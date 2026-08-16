@@ -21,6 +21,7 @@ export default function DropDown() {
 
       <Dropdown.Menu>
         {/* Vietoj href rašome savo Next.js puslapių kelius į eventKey */}
+        <Dropdown.Item eventKey="/">Home page</Dropdown.Item>
         <Dropdown.Item eventKey="/customers">Customers</Dropdown.Item>
         <Dropdown.Item eventKey="/orders">Orders</Dropdown.Item>
         <Dropdown.Item eventKey="/cars">Cars</Dropdown.Item>
