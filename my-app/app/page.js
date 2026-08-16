@@ -1,33 +1,51 @@
+"use client";
+
 import Dropdown from "./components/UI/Dropdown";
+import { useState } from "react";
+import { button, Modal, Form } from "react-bootstrap";
+import AddCustomerModal from "./components/AddCustomerModal";
+import AddButtonsRow from "./components/UI/AddButtonsRow";
 
 export default function Home() {
+  const [customerName, setCustomerName] = useState("");
+
+  const [addCustomerModalOpen, setAddCustomerModalOpen] = useState(false);
+  const [addOrderModalOpen, setAddOrderModalOpen] = useState(false);
+  const [addCarModalOpen, setAddCarModalOpen] = useState(false);
+  const [addPartModalOpen, setAddPartModalOpen] = useState(false);
+
   return (
     <div style={style.root}>
-      <div style={style.content}>
-        <div style={style.mainDropdown}></div>
-      </div>
+      <h2>Pagrindinis puslapis</h2>
+  
+      <AddButtonsRow 
+        setAddCustomerModalOpen={setAddCustomerModalOpen}
+        setAddOrderModalOpen={setAddOrderModalOpen}
+        setAddCarModalOpen={setAddCarModalOpen}
+        setAddPartModalOpen={setAddPartModalOpen}
+      />
+      {addCustomerModalOpen && (
+        <AddCustomerModal
+          customerName={customerName}
+          setCustomerName={setCustomerName}
+          setAddCustomerModalOpen={setAddCustomerModalOpen}
+        />
+      )}
     </div>
   );
 }
 
 const style = {
-  root: {
-    backgroundColor: "#f5f5f5",
+  addButton: {
+    borderRadius: "20px",
+    margin: "10px",
+    width: "200px",
+    height: "50px",
+    backgroundColor: "#41bb7e",
+  },
+  buttonRow: {
     display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
     justifyContent: "space-between",
-    minHeight: "100vh",
-  },
-  content: {
-    width: "100%",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "flex-start",
-    flex: 1,
-  },
-  mainDropdown: {
-    // justifyContent: "start",
-    backgroundColor: "#bf3636",
+    marginTop: "20px",
   },
 };

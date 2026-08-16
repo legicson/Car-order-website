@@ -14,18 +14,40 @@ export default function DropDown() {
   };
 
   return (
-    <Dropdown onSelect={handleSelect}>
-      <Dropdown.Toggle variant="success" id="dropdown-basic">
+    <Dropdown style={style.dropdown} onSelect={handleSelect}>
+      <Dropdown.Toggle
+        style={style.mainButton}
+        // variant="success"
+        id="dropdown-basic"
+      >
         Menu
       </Dropdown.Toggle>
 
       <Dropdown.Menu>
         {/* Vietoj href rašome savo Next.js puslapių kelius į eventKey */}
-        <Dropdown.Item eventKey="/">Home page</Dropdown.Item>
-        <Dropdown.Item eventKey="/customers">Customers</Dropdown.Item>
-        <Dropdown.Item eventKey="/orders">Orders</Dropdown.Item>
-        <Dropdown.Item eventKey="/cars">Cars</Dropdown.Item>
+        <Dropdown.Item eventKey="../">Pagrindinis puslapis</Dropdown.Item>
+        <Dropdown.Item eventKey="/screens/customers">Klientai</Dropdown.Item>
+        <Dropdown.Item eventKey="/screens/orders">Užsakymai</Dropdown.Item>
+        <Dropdown.Item eventKey="/screens/cars">Automobiliai</Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>
   );
 }
+
+const style = {
+  dropdown: {
+    position: "absolute",
+    top: "5vh",
+    right: "5vh",
+    // backgroundColor: "#850c0c",
+    // width: "100%",
+    // marginLeft: "5vh",
+    // marginTop: "2vh",
+  },
+  mainButton: {
+    borderRadius: "20px",
+    padding: "10px 30px",
+    backgroundColor: "#134469ff",
+    border: "none",
+  },
+};
