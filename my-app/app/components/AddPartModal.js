@@ -35,15 +35,15 @@ function AddPartModal({ setAddPartModalOpen }) {
 
   return (
     <div
-      onClick={() => setAddCustomerModalOpen(false)}
+      onClick={() => setAddPartModalOpen(false)}
       style={style.modalOverlay}
     >
       <div onClick={(e) => e.stopPropagation()} style={style.modalContent}>
         <form style={style.formContent} onSubmit={handlePartAdding}>
           <div style={style.formInput}>
-            <label htmlFor="customerName">Kliento vardas:</label> <br />
+            <label htmlFor="partName">Dalies pavadinimas:</label> <br />
             <input
-              id="customerName"
+              id="partName"
               placeholder="Dalis"
               value={partName}
               onChange={(e) => setPartName(e.target.value)}
@@ -51,16 +51,37 @@ function AddPartModal({ setAddPartModalOpen }) {
               minLength={3}
             />
           </div>
+          <div style={style.formInput}>
+            <label htmlFor="partPrice">Kaina:</label> <br />
+            <input
+              id="partPrice"
+              type="number"
+              placeholder="Kaina"
+              value={partPrice}
+              onChange={(e) => setPartPrice(e.target.value)}
+              style={style.modalInput}
+            />
+          </div>
+          <div style={style.formInput}>
+            <label htmlFor="partNumber">Dalies numeris:</label> <br />
+            <input
+              id="partNumber"
+              placeholder="Nr."
+              value={partNumber}
+              onChange={(e) => setPartNumber(e.target.value)}
+              style={style.modalInput}
+            />
+          </div>
 
           <div style={style.modalButtonsContainer}>
             <button type="submit" style={style.modalButton}>
-              Pridėti klientą
+              Pridėti dalį
             </button>
             <button
               type="button"
               style={style.modalButton}
               onClick={() => {
-                setAddCustomerModalOpen(false);
+                setAddPartModalOpen(false);
               }}
             >
               Uždaryti
