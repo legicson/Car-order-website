@@ -21,7 +21,8 @@ export default function customers({ children }) {
 
   useEffect(() => {
     fetchUsers();
-  }, [customers]);
+    console.log(customers);
+  }, [addCustomerModalOpen]);
 
   const showCustomer = () => {
     return (

@@ -34,10 +34,7 @@ function AddPartModal({ setAddPartModalOpen }) {
   };
 
   return (
-    <div
-      onClick={() => setAddPartModalOpen(false)}
-      style={style.modalOverlay}
-    >
+    <div onClick={() => setAddPartModalOpen(false)} style={style.modalOverlay}>
       <div onClick={(e) => e.stopPropagation()} style={style.modalContent}>
         <form style={style.formContent} onSubmit={handlePartAdding}>
           <div style={style.formInput}>
