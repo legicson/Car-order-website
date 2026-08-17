@@ -1,13 +1,30 @@
-function AddCustomerModay({
-  customerName,
-  setCustomerName,
-  setAddCustomerModalOpen,
-}) {
+import { useState, useEffect } from "react";
+import { supabase } from "./../supabaseClient"; // Importuojame klientą
+
+function AddCustomerModal({ setAddCustomerModalOpen }) {
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+
+  const addCustomer = async () => {
+    if (!customerName.trim()) return;
+
+    const { error } = await supabase
+      .from("customers")
+      .insert([{ name: customerName, phoneNo: customerPhone }]);
+
+    if (error) {
+      console.error("Klaida pridedant vartotoją:", error.message);
+    } else {
+      setCustomerName(""); // Išvalome laukelį
+      setCustomerPhone(""); // Išvalome telefono laukelį
+    }
+  };
+
   const handleCustomerAdding = (e) => {
     e.preventDefault();
     console.log("Customer added:", customerName);
+    addCustomer();
     setAddCustomerModalOpen(false);
-    setCustomerName("");
   };
 
   return (
@@ -31,6 +48,8 @@ function AddCustomerModay({
             <input
               id="customerPhone"
               placeholder="Telefono numeris"
+              value={customerPhone}
+              onChange={(e) => setCustomerPhone(e.target.value)}
               style={style.modalInput}
               type="text"
               minLength={6}
@@ -46,7 +65,6 @@ function AddCustomerModay({
               style={style.modalButton}
               onClick={() => {
                 setAddCustomerModalOpen(false);
-                setCustomerName("");
               }}
             >
               Uždaryti
@@ -58,7 +76,7 @@ function AddCustomerModay({
   );
 }
 
-export default AddCustomerModay;
+export default AddCustomerModal;
 
 const style = {
   modalOverlay: {

@@ -29,6 +29,7 @@ export default function DropDown() {
         <Dropdown.Item eventKey="/screens/customers">Klientai</Dropdown.Item>
         <Dropdown.Item eventKey="/screens/orders">Užsakymai</Dropdown.Item>
         <Dropdown.Item eventKey="/screens/cars">Automobiliai</Dropdown.Item>
+        <Dropdown.Item eventKey="/screens/parts">Dalys</Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>
   );
