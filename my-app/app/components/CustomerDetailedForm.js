@@ -1,12 +1,45 @@
 import { supabase } from "../supabaseClient";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import SmallCard from "./UI/SmallCard";
 
-
-function CustomerDetailedForm({ setModal, selectedCustomer }) {
+function CustomerDetailedForm({
+  setModal,
+  selectedCustomer,
+  addAdditionalCar,
+}) {
   const [customerName, setCustomerName] = useState(selectedCustomer.name);
   const [customerPhone, setCustomerPhone] = useState(
     selectedCustomer.phone_number == null ? "" : selectedCustomer.phone_number,
   );
+
+  const [cars, setCars] = useState([]);
+
+  useEffect(() => {
+    fetchCars();
+  }, []);
+
+  const fetchCars = async () => {
+    const { data, error } = await supabase
+      .from("cars")
+      .select("*")
+      .eq("user_id", selectedCustomer.id);
+
+    if (error) {
+      console.error("Klaida gaunant automobilius:", error.message);
+    } else {
+      setCars(data);
+    }
+  };
+
+  const returnCarCards = () => {
+    return cars.map((car) => (
+      <SmallCard
+        key={car.id}
+        header={car.car_name}
+        addionalDetails={car.year}
+      />
+    ));
+  };
 
   const handleCustomerChange = async (e) => {
     e.preventDefault();
@@ -59,10 +92,12 @@ function CustomerDetailedForm({ setModal, selectedCustomer }) {
           //   minLength={6}
         />
       </div>
+      <h2 style={styles.carsHeader}>Automobiliai</h2>
+      <div style={styles.carsContainer}>{returnCarCards()}</div>
 
       <div style={styles.modalButtonsContainer}>
         <button type="submit" style={styles.modalButton}>
-          Pridėti klientą
+          Išsaugoti pakeitimus
         </button>
         <button
           type="button"
@@ -74,7 +109,7 @@ function CustomerDetailedForm({ setModal, selectedCustomer }) {
         <button
           type="button"
           style={styles.modalButton}
-          onClick={() => setModal(false)}
+          onClick={addAdditionalCar}
         >
           Pridėti automobilį
         </button>
@@ -109,11 +144,20 @@ const styles = {
   },
   formContent: {
     display: "flex",
+    height: "100%",
+
     flexDirection: "column",
   },
   formInput: {
+    flex: 1,
     display: "flex",
     flexDirection: "column",
     alignItems: "flex-start",
+  },
+  carsContainer: {
+    display: "flex",
+  },
+  carsHeader: {
+    textAlign: "center",
   },
 };

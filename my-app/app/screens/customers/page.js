@@ -26,6 +26,22 @@ export default function customers({ children }) {
 
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
+  useEffect(() => {
+    if (!modal && !detailedModal) {
+      resetValues();
+    }
+  }, [modal, detailedModal]);
+
+  const resetValues = () => {
+    setCustomerName("");
+    setCustomerPhone("");
+    setUserId("");
+    setCar("");
+    setRegistrationNumber("");
+    setYear("");
+    setVin("");
+    setFormState("customer");
+  };
   const addCustomer = async () => {
     if (!customerName.trim()) return;
 
@@ -46,18 +62,17 @@ export default function customers({ children }) {
   };
 
   const addCar = async () => {
+    console.log("Inserting for user ID:", userId);
     if (!car.trim()) return;
 
-    const { error } = await supabase
-      .from("cars")
-      .insert([
-        {
-          car_name: car,
-          registration_no: registrationNumber,
-          year: year,
-          user_id: userId,
-        },
-      ]);
+    const { error } = await supabase.from("cars").insert([
+      {
+        car_name: car,
+        registration_no: registrationNumber,
+        year: year,
+        user_id: formState === "additionalCar" ? selectedCustomer.id : userId,
+      },
+    ]);
 
     if (error) {
       console.error("Klaida pridedant automobilį:", error.message);
@@ -102,18 +117,6 @@ export default function customers({ children }) {
     setUserId(customers.length + 1);
   }, [modal]);
 
-  const showCustomer = () => {
-    return (
-      <ul>
-        {customers.map((customer) => (
-          <li key={customer.id}>
-            {customer.name} - {customer.phoneNo}
-          </li>
-        ))}
-      </ul>
-    );
-  };
-
   const openDetailedView = (customer) => {
     setSelectedCustomer(customer);
     setDetailedModal(true);
@@ -156,7 +159,7 @@ export default function customers({ children }) {
           setVin={setVin}
         />
       );
-    } else {
+    } else if (formState === "car") {
       return (
         <CarForm
           year={year}
@@ -171,7 +174,28 @@ export default function customers({ children }) {
           setRegistrationNumber={setRegistrationNumber}
         />
       );
+    } else if (formState === "additionalCar") {
+      return (
+        <CarForm
+          year={year}
+          setYear={setYear}
+          userId={selectedCustomer.id}
+          setUserId={setUserId}
+          handleCarAdding={handleCarAdding}
+          setModal={setModal}
+          carName={car}
+          setCarName={setCar}
+          registrationNumber={registrationNumber}
+          setRegistrationNumber={setRegistrationNumber}
+        />
+      );
     }
+  };
+
+  const addAdditionalCar = () => {
+    setFormState("additionalCar");
+    setDetailedModal(false);
+    setModal(true);
   };
 
   return (
@@ -196,6 +220,7 @@ export default function customers({ children }) {
           <CustomerDetailedForm
             setModal={setDetailedModal}
             selectedCustomer={selectedCustomer}
+            addAdditionalCar={addAdditionalCar}
           />
         </ModalWrapper>
       )}
