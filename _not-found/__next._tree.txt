@@ -1,4 +1,4 @@
 :HL["/Car-order-website/_next/static/chunks/3-nubq2j9o_kp.css","style"]
 :HL["/Car-order-website/_next/static/chunks/0fxi_h-xzasxo.css","style"]
 :HL["/Car-order-website/_next/static/chunks/004qrp64c1xq4.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":4176,"slots":{"children":{"name":"/_not-found","param":null,"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}},"staleTime":300,"buildId":"eepnDEmEQKGYs0BFpFxQz"}
+0:{"tree":{"name":"","param":null,"prefetchHints":4176,"slots":{"children":{"name":"/_not-found","param":null,"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}},"staleTime":300,"buildId":"l7a7q-eIrN-u9XeVK5qwJ"}
