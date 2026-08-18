@@ -5,6 +5,7 @@ import SmallCard from "./UI/SmallCard";
 function CustomerDetailedForm({
   setModal,
   selectedCustomer,
+  setSelectedCustomer,
   addAdditionalCar,
 }) {
   const [customerName, setCustomerName] = useState(selectedCustomer.name);
@@ -57,7 +58,6 @@ function CustomerDetailedForm({
 
         if (error) throw error;
 
-        alert("Customer updated successfully!");
         setModal(false);
       } catch (error) {
         console.error("Error updating customer:", error.message);
@@ -67,6 +67,7 @@ function CustomerDetailedForm({
       // ADD LOGIC (calls the original function passed from parent)
       await handleCustomerAdding(e);
     }
+    setSelectedCustomer(null);
   };
 
   return (

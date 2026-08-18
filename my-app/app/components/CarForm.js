@@ -45,22 +45,11 @@ function CarForm({
           type="text"
           // minLength={6}
         />
-        <label htmlFor="userId">Klientas</label> <br />
-        <input
-          id="userId"
-          placeholder="..."
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-          style={styles.modalInput}
-          type="text"
-          // minLength={6}
-        />
-        {/* <ListDropdown/> */}
       </div>
 
       <div style={styles.modalButtonsContainer}>
         <button type="submit" style={styles.modalButton}>
-          Pridėti automobilį
+          Išsaugoti pakeitimus
         </button>
         <button
           type="button"

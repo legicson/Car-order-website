@@ -95,7 +95,7 @@ export default function customers({ children }) {
 
   const handleCustomerAdding = (e) => {
     e.preventDefault();
-    console.log("Customer added:", customerName);
+    // console.log("Customer added:", customerName);
     addCustomer();
     // setModal(false);
     setFormState("car");
@@ -115,7 +115,7 @@ export default function customers({ children }) {
     fetchUsers();
     console.log(customers);
     setUserId(customers.length + 1);
-  }, [modal]);
+  }, [modal, selectedCustomer]);
 
   const openDetailedView = (customer) => {
     setSelectedCustomer(customer);
@@ -220,6 +220,7 @@ export default function customers({ children }) {
           <CustomerDetailedForm
             setModal={setDetailedModal}
             selectedCustomer={selectedCustomer}
+            setSelectedCustomer={setSelectedCustomer}
             addAdditionalCar={addAdditionalCar}
           />
         </ModalWrapper>

@@ -14,6 +14,7 @@ import CarForm from "./../../components/CarForm";
 export default function cars({ children }) {
   const [modal, setModal] = useState(false);
   const [detailedModal, setDetailedModal] = useState(false);
+  const [carId, setCarId] = useState("");
   const [cars, setCars] = useState([]);
   const [carName, setCarName] = useState("");
   const [registrationNumber, setRegistrationNumber] = useState("");
@@ -22,50 +23,63 @@ export default function cars({ children }) {
 
   const [selectedCar, setSelectedCar] = useState(null);
 
-  const addCar = async () => {
-    if (!carName.trim()) return;
+  const editCarDetails = async () => {
+    if (userId) {
+      try {
+        const { error } = await supabase
+          .from("cars")
+          .update({
+            car_name: carName,
+            registration_no: registrationNumber,
+            year: year,
+          })
+          .eq("user_id", userId)
+          .eq("id", carId);
 
-    const { error } = await supabase
-      .from("cars")
-      .insert([{ car_name: carName, registration_no: registrationNumber, year: year, user_id: userId }]);
+        if (error) throw error;
 
-    if (error) {
-      console.error("Klaida pridedant automobilį:", error.message);
-    } else {
-      setCarName(""); // Išvalome laukelį
-      setRegistrationNumber(""); // Išvalome telefono laukelį
-      setYear("");
-      setUserId("");
+        setModal(false);
+      } catch (error) {
+        console.error("Error updating car:", error.message);
+        alert("Error updating car: " + error.message);
+      }
     }
+    setCarName("");
+    setRegistrationNumber("");
+    setYear("");
+    setUserId("");
   };
 
   const handleCarAdding = (e) => {
     e.preventDefault();
     console.log("Car added:", carName);
-    addCar();
+    editCarDetails();
     setModal(false);
   };
 
-  const fetchUsers = async () => {
+  const fetchCars = async () => {
     const { data, error } = await supabase.from("cars").select("*");
 
     if (error) {
       console.error("Klaida gaunant automobilius:", error.message);
     } else {
-      setCars(data);
+      setCars(data.sort((a, b) => a.id - b.id));
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchCars();
     console.log(cars);
-  }, [modal]);
+  }, [modal, userId]);
 
+  const openDetailedView = (car) => {
+    setCarName(car.car_name);
+    setRegistrationNumber(car.registration_no);
+    setYear(car.year);
+    setUserId(car.user_id);
+    setCarId(car.id);
 
-
-  const openDetailedView = (customer) => {
-    setSelectedCar(customer);
-    setDetailedModal(true);
+    setModal(true);
   };
 
   const showCustomerList = () => {
@@ -88,36 +102,22 @@ export default function cars({ children }) {
   return (
     <div style={styles.root}>
       <h1>Automobiliai</h1>
-      <CustomButton
-        ButtonText="Pridėti Klientą"
-        onClick={() => setModal(true)}
-      />
+
       <div style={styles.pageContent}>{showCustomerList()}</div>
 
       {modal && (
         <ModalWrapper isOpen={modal} onClose={() => setModal(false)}>
           <CarForm
+            year={year}
+            setYear={setYear}
+            userId={userId}
+            setUserId={setUserId}
             handleCarAdding={handleCarAdding}
             setModal={setModal}
             carName={carName}
             setCarName={setCarName}
             registrationNumber={registrationNumber}
             setRegistrationNumber={setRegistrationNumber}
-            year={year}
-            setYear={setYear}
-            userId={userId}
-            setUserId={setUserId}
-          />
-        </ModalWrapper>
-      )}
-      {detailedModal && (
-        <ModalWrapper
-          isOpen={detailedModal}
-          onClose={() => setDetailedModal(false)}
-        >
-          <CustomerDetailedForm
-            setModal={setDetailedModal}
-            selectedCustomer={selectedCar}
           />
         </ModalWrapper>
       )}
