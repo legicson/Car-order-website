@@ -4,6 +4,7 @@ import { supabase } from "./../../supabaseClient"; // Importuojame klientą
 import { useState, useEffect } from "react";
 import CustomButton from "../../components/UI/CustomButton";
 import AddCustomerModal from "./../../components/AddCustomerModal";
+import { Hedvig_Letters_Sans } from "next/font/google";
 
 export default function customers({ children }) {
   const [addCustomerModalOpen, setAddCustomerModalOpen] = useState(false);
@@ -37,7 +38,7 @@ export default function customers({ children }) {
   };
 
   return (
-    <div style={{ padding: "30px", fontFamily: "Arial" }}>
+    <div style={styles.root}>
       <h1>Klientai</h1>
       <CustomButton
         ButtonText="Pridėti Klientą"
@@ -51,3 +52,14 @@ export default function customers({ children }) {
     </div>
   );
 }
+
+const styles = {
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    backgroundColor: "#638574",
+    width: "100%",
+    
+    
+  },
+};
