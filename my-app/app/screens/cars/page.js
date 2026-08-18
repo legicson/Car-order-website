@@ -100,10 +100,21 @@ export default function cars({ children }) {
   };
 
   return (
-    <div style={styles.root}>
-      <h1>Automobiliai</h1>
+    <div className="container mt-4">
+      <h1 className="mb-4">Automobiliai</h1>
 
-      <div style={styles.pageContent}>{showCustomerList()}</div>
+      <div className="row g-3">
+        {cars.map((car) => (
+          <div key={car.id} className="col-12 col-md-6 col-lg-4">
+            <Card
+              id={car.id}
+              header={car.car_name}
+              addionalDetails={car.registration_no}
+              onClick={openDetailedView.bind(this, car)}
+            />
+          </div>
+        ))}
+      </div>
 
       {modal && (
         <ModalWrapper isOpen={modal} onClose={() => setModal(false)}>

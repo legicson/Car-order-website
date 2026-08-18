@@ -126,7 +126,7 @@ export default function customers({ children }) {
     return (
       <>
         {customers.map((customer) => (
-          <div key={customer.id}>
+          <div key={customer.id} className="col-12 col-md-6 col-lg-4">
             <Card
               id={customer.id}
               header={customer.name}
@@ -199,13 +199,19 @@ export default function customers({ children }) {
   };
 
   return (
-    <div style={styles.root}>
-      <h1>Klientai</h1>
-      <CustomButton
-        ButtonText="Pridėti Klientą"
-        onClick={() => setModal(true)}
-      />
-      <div style={styles.pageContent}>{showCustomerList()}</div>
+    <div className="container mt-4">
+      <h1 className="mb-4">Klientai</h1>
+
+      <div className="mb-4">
+        <CustomButton
+          ButtonText="Pridėti Klientą"
+          onClick={() => setModal(true)}
+        />
+      </div>
+
+      <div className="row g-3">
+        {showCustomerList()}
+      </div>
 
       {modal && (
         <ModalWrapper isOpen={modal} onClose={() => setModal(false)}>
