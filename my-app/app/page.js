@@ -3,7 +3,7 @@
 import Dropdown from "./components/UI/Dropdown";
 import { useState, useEffect } from "react";
 import { button, Modal, Form } from "react-bootstrap";
-import AddCustomerModal from "./components/AddCustomerModal";
+import AddCustomerModal from "./components/CustomerForm";
 import AddButtonsRow from "./components/UI/AddButtonsRow";
 import { supabase } from "./supabaseClient"; // Importuojame klientą
 
@@ -43,7 +43,7 @@ export default function Home() {
       {addCustomerModalOpen && (
         <AddCustomerModal setAddCustomerModalOpen={setAddCustomerModalOpen} />
       )}
-      <button onClick={() => console.log(customers)} style={style.addButton}>
+      <button onClick={() => console.log(customers[23].assets)} style={style.addButton}>
         Test
       </button>
     </div>
@@ -57,11 +57,11 @@ const style = {
     width: "200px",
     height: "50px",
     backgroundColor: "#41bb7e",
+  
   },
   buttonRow: {
     display: "flex",
     justifyContent: "space-between",
     marginTop: "20px",
-    
   },
 };

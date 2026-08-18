@@ -3,12 +3,88 @@
 import { supabase } from "./../../supabaseClient"; // Importuojame klientą
 import { useState, useEffect } from "react";
 import CustomButton from "../../components/UI/CustomButton";
-import AddCustomerModal from "./../../components/AddCustomerModal";
-import { Hedvig_Letters_Sans } from "next/font/google";
+import AddCustomerModal from "../../components/CustomerForm";
+import ModalWrapper from "./../../components/ModalWrapper";
+
+import Card from "./../../components/Card";
+import CustomerForm from "./../../components/CustomerForm";
+import CarForm from "./../../components/CarForm";
+import CustomerDetailedForm from "./../../components/CustomerDetailedForm";
 
 export default function customers({ children }) {
-  const [addCustomerModalOpen, setAddCustomerModalOpen] = useState(false);
+  const [modal, setModal] = useState(false);
+  const [formState, setFormState] = useState("customer");
+  const [detailedModal, setDetailedModal] = useState(false);
   const [customers, setCustomers] = useState([]);
+  const [customerName, setCustomerName] = useState("");
+  const [userId, setUserId] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [car, setCar] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [year, setYear] = useState("");
+  const [vin, setVin] = useState("");
+
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+
+  const addCustomer = async () => {
+    if (!customerName.trim()) return;
+
+    const { error } = await supabase.from("customers").insert([
+      {
+        id: userId,
+        name: customerName,
+        phone_number: customerPhone,
+      },
+    ]);
+
+    if (error) {
+      console.error("Klaida pridedant vartotoją:", error.message);
+    } else {
+      setCustomerName(""); // Išvalome laukelį
+      setCustomerPhone(""); // Išvalome telefono laukelį
+    }
+  };
+
+  const addCar = async () => {
+    if (!car.trim()) return;
+
+    const { error } = await supabase
+      .from("cars")
+      .insert([
+        {
+          car_name: car,
+          registration_no: registrationNumber,
+          year: year,
+          user_id: userId,
+        },
+      ]);
+
+    if (error) {
+      console.error("Klaida pridedant automobilį:", error.message);
+    } else {
+      setCar(""); // Išvalome laukelį
+      setRegistrationNumber(""); // Išvalome telefono laukelį
+      setVin("");
+      setYear("");
+      setUserId("");
+    }
+  };
+
+  const handleCarAdding = (e) => {
+    e.preventDefault();
+    console.log("Car added:", carName);
+    addCar();
+    setModal(false);
+    setFormState("customer");
+  };
+
+  const handleCustomerAdding = (e) => {
+    e.preventDefault();
+    console.log("Customer added:", customerName);
+    addCustomer();
+    // setModal(false);
+    setFormState("car");
+  };
 
   const fetchUsers = async () => {
     const { data, error } = await supabase.from("customers").select("*");
@@ -16,14 +92,15 @@ export default function customers({ children }) {
     if (error) {
       console.error("Klaida gaunant vartotojus:", error.message);
     } else {
-      setCustomers(data);
+      setCustomers(data.sort((a, b) => a.id - b.id));
     }
   };
 
   useEffect(() => {
     fetchUsers();
     console.log(customers);
-  }, [addCustomerModalOpen]);
+    setUserId(customers.length + 1);
+  }, [modal]);
 
   const showCustomer = () => {
     return (
@@ -37,17 +114,90 @@ export default function customers({ children }) {
     );
   };
 
+  const openDetailedView = (customer) => {
+    setSelectedCustomer(customer);
+    setDetailedModal(true);
+  };
+
+  const showCustomerList = () => {
+    return (
+      <>
+        {customers.map((customer) => (
+          <div key={customer.id}>
+            <Card
+              id={customer.id}
+              header={customer.name}
+              addionalDetails={customer.phone_number}
+              onClick={openDetailedView.bind(this, customer)}
+            />
+          </div>
+        ))}
+      </>
+    );
+  };
+
+  const returnForm = () => {
+    if (formState === "customer") {
+      return (
+        <CustomerForm
+          handleCustomerAdding={handleCustomerAdding}
+          setModal={setModal}
+          customerName={customerName}
+          setCustomerName={setCustomerName}
+          customerPhone={customerPhone}
+          setCustomerPhone={setCustomerPhone}
+          car={car}
+          setCar={setCar}
+          registrationNumber={registrationNumber}
+          setRegistrationNumber={setRegistrationNumber}
+          year={year}
+          setYear={setYear}
+          vin={vin}
+          setVin={setVin}
+        />
+      );
+    } else {
+      return (
+        <CarForm
+          year={year}
+          setYear={setYear}
+          userId={userId}
+          setUserId={setUserId}
+          handleCarAdding={handleCarAdding}
+          setModal={setModal}
+          carName={car}
+          setCarName={setCar}
+          registrationNumber={registrationNumber}
+          setRegistrationNumber={setRegistrationNumber}
+        />
+      );
+    }
+  };
+
   return (
     <div style={styles.root}>
       <h1>Klientai</h1>
       <CustomButton
         ButtonText="Pridėti Klientą"
-        onClick={() => setAddCustomerModalOpen(true)}
+        onClick={() => setModal(true)}
       />
-      {showCustomer()}
+      <div style={styles.pageContent}>{showCustomerList()}</div>
 
-      {addCustomerModalOpen && (
-        <AddCustomerModal setAddCustomerModalOpen={setAddCustomerModalOpen} />
+      {modal && (
+        <ModalWrapper isOpen={modal} onClose={() => setModal(false)}>
+          {returnForm()}
+        </ModalWrapper>
+      )}
+      {detailedModal && (
+        <ModalWrapper
+          isOpen={detailedModal}
+          onClose={() => setDetailedModal(false)}
+        >
+          <CustomerDetailedForm
+            setModal={setDetailedModal}
+            selectedCustomer={selectedCustomer}
+          />
+        </ModalWrapper>
       )}
     </div>
   );
@@ -56,10 +206,54 @@ export default function customers({ children }) {
 const styles = {
   root: {
     display: "flex",
+    flex: 1,
     flexDirection: "column",
-    backgroundColor: "#638574",
+    // backgroundColor: "#9d4c19",
+    width: "90%",
+  },
+  pageContent: {
+    // display:"flex",
+    // flexDirection:"row",
+    // flex:1,
+    // margin: 50,
+  },
+
+  modalButtonsContainer: {
+    display: "flex",
     width: "100%",
-    
-    
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalButton: {
+    borderRadius: "20px",
+    width: "30%",
+    height: "50px",
+    margin: "10px",
+  },
+  modalInput: {
+    width: "80%",
+    height: "40px",
+    borderRadius: "10px",
+    textAlign: "center",
+    fontSize: "25px",
+  },
+  formContent: {
+    // margin: "7%",
+    display: "flex",
+    flexDirection: "column",
+    // justifyContent: "center",
+    // alignItems: "center",
+    height: "100%",
+
+    // backgroundColor: "red",
+  },
+  formInput: {
+    display: "flex",
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    // height: "100%",
+    // width: "100%",
   },
 };
