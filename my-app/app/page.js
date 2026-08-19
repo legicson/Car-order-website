@@ -7,6 +7,7 @@ import AddCustomerModal from "./components/CustomerForm";
 import AddButtonsRow from "./components/UI/AddButtonsRow";
 import { supabase } from "./supabaseClient"; // Importuojame klientą
 import { AddCustomer } from "./services/customers";
+import Card from "./components/Card";
 
 export default function Home() {
   const [customers, setCustomers] = useState([]);
@@ -14,11 +15,29 @@ export default function Home() {
   const [orders, setOrders] = useState([]);
   const [parts, setParts] = useState([]);
 
-  const [showCustomerForm, setShowCustomerForm] = useState(true);
+  const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [step, setStep] = useState(1);
   const [custId, setCustId] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+
+  const [carName, setCarName] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [year, setYear] = useState("");
+  const [vin, setVin] = useState("");
+
+  const [showOrderForm, setShowOrderForm] = useState(false);
+
+  const resetValues = () => {
+    setCustId("");
+    setCustomerName("");
+    setCustomerPhone("");
+    setCarName("");
+    setRegistrationNumber("");
+    setYear("");
+    setVin("");
+    setStep(1);
+  };
 
   // Navigacijos funkcijos
   const nextStep = () => setStep((prev) => prev + 1);
@@ -32,7 +51,6 @@ export default function Home() {
       console.error("Klaida gaunant vartotojus:", error.message);
     } else {
       setCustomers(data);
-      setCustId(data.length + 1);
     }
   };
 
@@ -46,24 +64,74 @@ export default function Home() {
     }
   };
 
+  const addCustomer = async () => {
+    if (!customerName.trim()) return;
+
+    const { data, error } = await supabase
+      .from("customers")
+      .insert([
+        {
+          name: customerName,
+          phone_number: customerPhone,
+        },
+      ])
+      .select();
+
+    if (error) {
+      console.error("Klaida pridedant vartotoją:", error.message);
+    } else {
+      console.log("Vartotojas pridedas");
+      return data[0].id;
+    }
+  };
+
+  const addCar = async (newCustomerId) => {
+    if (!carName.trim()) return;
+
+    const { error } = await supabase.from("cars").insert([
+      {
+        car_name: carName,
+        registration_no: registrationNumber,
+        year: year,
+        user_id: newCustomerId,
+      },
+    ]);
+
+    if (error) {
+      console.error("Klaida pridedant automobilį:", error.message);
+    } else {
+      console.log("Automobilis pridedas");
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
     fetchCars();
   }, []);
 
-  const handleAddingCustomer = (e) => {
-    console.log("Customer added:", customerName);
+  const handleContinueClick = (e) => {
     e.preventDefault();
-    // AddCustomer(customerName, customerPhone);
-    // setShowCustomerForm(false);
-    console.log(step);
     nextStep();
-    console.log(step);
+  };
+
+  const handleAddingCarCustomer = async (e) => {
+    e.preventDefault();
+
+    const newCustomerId = await addCustomer();
+    if (newCustomerId) {
+      await addCar(newCustomerId);
+      fetchUsers();
+      fetchCars();
+      resetValues();
+      setShowCustomerForm(false);
+    } else {
+      console.log("Nepavyko prideti kliento");
+    }
   };
 
   const returnCustomerAddForm = () => {
     return (
-      <form onSubmit={handleAddingCustomer} style={style.formContainer}>
+      <form onSubmit={handleContinueClick} style={style.formContainer}>
         <div style={style.formInputContainer}>
           <label style={style.formLabel}>Vardas Pavarde</label>
           <input
@@ -93,6 +161,7 @@ export default function Home() {
             style={style.formButton}
             onClick={() => {
               setShowCustomerForm(false);
+              resetValues();
             }}
           >
             Grįžti
@@ -104,21 +173,37 @@ export default function Home() {
 
   const returnCarAddForm = () => {
     return (
-      <form onSubmit={handleAddingCustomer} style={style.formContainer}>
+      <form onSubmit={handleAddingCarCustomer} style={style.formContainer}>
         <div style={style.formInputContainer}>
-          <label style={style.formLabel}>Vardas Pavarde</label>
+          <label style={style.formLabel}>Markė</label>
           <input
             style={style.formInput}
             type="text"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            placeholder="Jonas Jonaitis"
+            value={carName}
+            onChange={(e) => setCarName(e.target.value)}
+            placeholder="Mercedes"
+          />
+          <label style={style.formLabel}>Registracijos numeris</label>
+          <input
+            style={style.formInput}
+            type="text"
+            value={registrationNumber}
+            onChange={(e) => setRegistrationNumber(e.target.value)}
+            placeholder="ABC123"
+          />
+          <label style={style.formLabel}>Metai</label>
+          <input
+            style={style.formInput}
+            type="text"
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            placeholder="ABC123"
           />
         </div>
 
         <div style={style.formButtonContainer}>
           <button type="submit" style={style.formButton}>
-            Tęsti
+            Sukurti
           </button>
           <button
             type="button"
@@ -134,15 +219,46 @@ export default function Home() {
     );
   };
 
+  const returnCustomerListForOrder = () => {
+    return (
+      <>
+        <h2>Pasirinkite klientą naujam užsakymui</h2>
+        {customers.map((customer) => (
+          <div style={style.listContainer} key={customer.id}>
+            <Card
+              id={customer.id}
+              header={customer.name}
+              addionalDetails={customer.phone_number}
+            />
+          </div>
+        ))}
+        <button
+          type="button"
+          style={style.formButton}
+          onClick={() => {
+            setShowOrderForm(false);
+            resetValues();
+          }}
+        >
+          Grįžti
+        </button>
+      </>
+    );
+  };
+
   return (
     <div style={style.root}>
       <div>
-        <h2>Pagrindinis puslapis</h2>
-        <AddButtonsRow />
+        {!showOrderForm && !showCustomerForm && (
+          <AddButtonsRow
+            setAddCustomerModalOpen={setShowCustomerForm}
+            setAddOrderModalOpen={setShowOrderForm}
+          />
+        )}
       </div>
 
       <div style={style.content}>
-        <h2>Naujas klientas</h2>
+        {showOrderForm && returnCustomerListForOrder()}
 
         {showCustomerForm &&
           ((step === 1 && returnCustomerAddForm()) ||
@@ -233,5 +349,8 @@ const style = {
     width: "100%",
     flexDirection: "column",
     alignItems: "center",
+  },
+  listContainer: {
+    width: "100%",
   },
 };

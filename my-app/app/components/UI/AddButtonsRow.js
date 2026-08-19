@@ -15,7 +15,7 @@ function AddButtonsRow({
         </button>
         <button
           style={style.addButton}
-          onClick={() => setAddCustomerModalOpen(true)}
+          onClick={() => setAddOrderModalOpen(true)}
         >
           Sukurti užsakymą
         </button>
