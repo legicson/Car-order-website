@@ -27,6 +27,8 @@ export default function Home() {
   const [vin, setVin] = useState("");
 
   const [showOrderForm, setShowOrderForm] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedCar, setSelectedCar] = useState(null);
 
   const resetValues = () => {
     setCustId("");
@@ -36,6 +38,7 @@ export default function Home() {
     setRegistrationNumber("");
     setYear("");
     setVin("");
+    setSelectedCustomer(null);
     setStep(1);
   };
 
@@ -104,6 +107,24 @@ export default function Home() {
     }
   };
 
+  const addOrder = async (car) => {
+    if (!car) return;
+
+    const { error } = await supabase.from("orders").insert([
+      {
+        car_id: car.id,
+        income: 0,
+        total_price: 0,
+        status: "Active",
+      },
+    ]);
+
+    if (error) {
+      console.error("Klaida pridedant uzsakyma:", error.message);
+    } else {
+      console.log("Uzsakymas sukurtas");
+    }
+  };
   useEffect(() => {
     fetchUsers();
     fetchCars();
@@ -172,50 +193,8 @@ export default function Home() {
   };
 
   const returnCarAddForm = () => {
-    return (
-      <form onSubmit={handleAddingCarCustomer} style={style.formContainer}>
-        <div style={style.formInputContainer}>
-          <label style={style.formLabel}>Markė</label>
-          <input
-            style={style.formInput}
-            type="text"
-            value={carName}
-            onChange={(e) => setCarName(e.target.value)}
-            placeholder="Mercedes"
-          />
-          <label style={style.formLabel}>Registracijos numeris</label>
-          <input
-            style={style.formInput}
-            type="text"
-            value={registrationNumber}
-            onChange={(e) => setRegistrationNumber(e.target.value)}
-            placeholder="ABC123"
-          />
-          <label style={style.formLabel}>Metai</label>
-          <input
-            style={style.formInput}
-            type="text"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            placeholder="ABC123"
-          />
-        </div>
-
-        <div style={style.formButtonContainer}>
-          <button type="submit" style={style.formButton}>
-            Sukurti
-          </button>
-          <button
-            type="button"
-            style={style.formButton}
-            onClick={() => {
-              prevStep();
-            }}
-          >
-            Grįžti
-          </button>
-        </div>
-      </form>
+    const customerCars = cars.filter(
+      (car) => car.user_id === selectedCustomer.id,
     );
   };
 
@@ -229,6 +208,7 @@ export default function Home() {
               id={customer.id}
               header={customer.name}
               addionalDetails={customer.phone_number}
+              onClick={() => onClickSetSelectedCustomer(customer)}
             />
           </div>
         ))}
@@ -240,7 +220,61 @@ export default function Home() {
             resetValues();
           }}
         >
+          Atšaukti
+        </button>
+      </>
+    );
+  };
+
+  const onClickSetSelectedCustomer = (item) => {
+    setSelectedCustomer(item);
+    nextStep();
+  };
+
+  const onClickSetSelectedCar = (item) => {
+    addOrder(item);
+    setShowOrderForm(false);
+    resetValues();
+  };
+
+  const returnCarListForOrder = () => {
+    if (!selectedCustomer) return null;
+    const customerCars = cars.filter(
+      (car) => car.user_id === selectedCustomer.id,
+    );
+    return (
+      <>
+        <h2>Pasirinkite automobilį</h2>
+        {customerCars.map((car) => (
+          <div style={style.listContainer} key={car.id}>
+            <Card
+              id={car.id}
+              header={car.car_name}
+              addionalDetails={car.registration_no}
+              onClick={() => {
+                onClickSetSelectedCar(car);
+              }}
+            />
+          </div>
+        ))}
+        <button
+          type="button"
+          style={style.formButton}
+          onClick={() => {
+            prevStep();
+          }}
+        >
           Grįžti
+        </button>
+        <button
+          type="button"
+          style={style.formButton}
+          onClick={() => {
+            setShowOrderForm(false);
+            resetValues();
+          }}
+        >
+          Atšaukti
         </button>
       </>
     );
@@ -258,7 +292,9 @@ export default function Home() {
       </div>
 
       <div style={style.content}>
-        {showOrderForm && returnCustomerListForOrder()}
+        {showOrderForm &&
+          ((step === 1 && returnCustomerListForOrder()) ||
+            (step === 2 && returnCarListForOrder()))}
 
         {showCustomerForm &&
           ((step === 1 && returnCustomerAddForm()) ||
