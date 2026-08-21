@@ -30,6 +30,13 @@ export default function Home() {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedCar, setSelectedCar] = useState(null);
 
+  const [showCarForm, setShowCarForm] = useState(false);
+
+  const [showPartForm, setShowPartForm] = useState(false);
+  const [partName, setPartName] = useState("");
+  const [partPrice, setPartPrice] = useState("");
+  const [partNumber, setPartNumber] = useState("");
+
   const resetValues = () => {
     setCustId("");
     setCustomerName("");
@@ -40,6 +47,12 @@ export default function Home() {
     setVin("");
     setSelectedCustomer(null);
     setStep(1);
+    setShowCustomerForm(false);
+    setShowCarForm(false);
+    setShowPartForm(false);
+    setPartName("");
+    setPartPrice("");
+    setPartNumber("");
   };
 
   // Navigacijos funkcijos
@@ -125,10 +138,41 @@ export default function Home() {
       console.log("Uzsakymas sukurtas");
     }
   };
+
+  const toFloat = (value) => {
+    if (typeof value !== "string") return NaN;
+    const normalized = value.trim().replace(",", ".");
+    return parseFloat(normalized);
+  };
+
+  const addPart = async () => {
+    if (!partName.trim()) return;
+    const normalizedPrice = toFloat(partPrice);
+    const { error } = await supabase.from("parts").insert([
+      {
+        partName: partName,
+        price: normalizedPrice,
+        partNumber: partNumber,
+      },
+    ]);
+
+    if (error) {
+      console.error("Klaida pridedant dali:", error.message);
+    } else {
+      console.log("Dalis sukurta");
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
     fetchCars();
   }, []);
+
+  const handlePartAdding = (e) => {
+    e.preventDefault();
+    addPart();
+    resetValues();
+  };
 
   const handleContinueClick = (e) => {
     e.preventDefault();
@@ -138,13 +182,20 @@ export default function Home() {
   const handleAddingCarCustomer = async (e) => {
     e.preventDefault();
 
-    const newCustomerId = await addCustomer();
+    // const newCustomerId = await addCustomer();
+
+    let newCustomerId;
+    if (showCarForm) {
+      newCustomerId = selectedCustomer.id;
+    } else {
+      newCustomerId = await addCustomer();
+    }
+
     if (newCustomerId) {
       await addCar(newCustomerId);
       fetchUsers();
       fetchCars();
       resetValues();
-      setShowCustomerForm(false);
     } else {
       console.log("Nepavyko prideti kliento");
     }
@@ -193,15 +244,111 @@ export default function Home() {
   };
 
   const returnCarAddForm = () => {
-    const customerCars = cars.filter(
-      (car) => car.user_id === selectedCustomer.id,
+    return (
+      <form onSubmit={handleAddingCarCustomer} style={style.formContainer}>
+        <div style={style.formInputContainer}>
+          <label style={style.formLabel}>Markė</label>
+          <input
+            style={style.formInput}
+            type="text"
+            value={carName}
+            onChange={(e) => setCarName(e.target.value)}
+            placeholder="Mercedes"
+          />
+          <label style={style.formLabel}>Registracijos numeris</label>
+          <input
+            style={style.formInput}
+            type="text"
+            value={registrationNumber}
+            onChange={(e) => setRegistrationNumber(e.target.value)}
+            placeholder="ABC123"
+          />
+          <label style={style.formLabel}>Metai</label>
+          <input
+            style={style.formInput}
+            type="text"
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            placeholder="ABC123"
+          />
+        </div>
+
+        <div style={style.formButtonContainer}>
+          <button type="submit" style={style.formButton}>
+            Sukurti
+          </button>
+          <button
+            type="button"
+            style={style.formButton}
+            onClick={() => {
+              prevStep();
+            }}
+          >
+            Grįžti
+          </button>
+        </div>
+      </form>
     );
   };
 
-  const returnCustomerListForOrder = () => {
+  const returnPartAddForm = () => {
+    return (
+      <form onSubmit={handlePartAdding} style={style.formContainer}>
+        <div style={style.formInputContainer}>
+          <label style={style.formLabel}>Pavadinimas</label>
+          <input
+            style={style.formInput}
+            type="text"
+            value={partName}
+            onChange={(e) => setPartName(e.target.value)}
+            placeholder="Motul 5W30"
+            minLength={3}
+          />
+          <label style={style.formLabel}>Kaina</label>
+          <input
+            style={style.formInput}
+            type="text"
+            value={partPrice}
+            onChange={(e) => setPartPrice(e.target.value)}
+            placeholder="0.00"
+          />
+          <label style={style.formLabel}>Dalies kodas</label>
+          <input
+            style={style.formInput}
+            type="text"
+            value={partNumber}
+            onChange={(e) => setPartNumber(e.target.value)}
+            placeholder="132-123-123"
+          />
+        </div>
+
+        <div style={style.formButtonContainer}>
+          <button type="submit" style={style.formButton}>
+            Sukurti
+          </button>
+          <button
+            type="button"
+            style={style.formButton}
+            onClick={() => {
+              setShowPartForm(false);
+              resetValues();
+            }}
+          >
+            Atšaukti
+          </button>
+        </div>
+      </form>
+    );
+  };
+
+  const returnSelectableCustomerList = () => {
     return (
       <>
-        <h2>Pasirinkite klientą naujam užsakymui</h2>
+        {showOrderForm ? (
+          <h2>Pasirinkite klientą naujam užsakymui</h2>
+        ) : (
+          <h2>Pasirinkite klientą kuriam norite prideti automobili</h2>
+        )}
         {customers.map((customer) => (
           <div style={style.listContainer} key={customer.id}>
             <Card
@@ -283,17 +430,25 @@ export default function Home() {
   return (
     <div style={style.root}>
       <div>
-        {!showOrderForm && !showCustomerForm && (
+        {!showOrderForm && !showCustomerForm && !showCarForm && (
           <AddButtonsRow
             setAddCustomerModalOpen={setShowCustomerForm}
             setAddOrderModalOpen={setShowOrderForm}
+            setAddCarModalOpen={setShowCarForm}
+            setAddPartModalOpen={setShowPartForm}
           />
         )}
       </div>
 
       <div style={style.content}>
+        {showPartForm && returnPartAddForm()}
+
+        {showCarForm &&
+          ((step === 1 && returnSelectableCustomerList()) ||
+            (step === 2 && returnCarAddForm()))}
+
         {showOrderForm &&
-          ((step === 1 && returnCustomerListForOrder()) ||
+          ((step === 1 && returnSelectableCustomerList()) ||
             (step === 2 && returnCarListForOrder()))}
 
         {showCustomerForm &&

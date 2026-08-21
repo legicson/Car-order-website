@@ -21,13 +21,13 @@ function AddButtonsRow({
         </button>
         <button
           style={style.addButton}
-          onClick={() => setAddCustomerModalOpen(true)}
+          onClick={() => setAddCarModalOpen(true)}
         >
           Pridėti automobilį
         </button>
         <button
           style={style.addButton}
-          onClick={() => setAddCustomerModalOpen(true)}
+          onClick={() => setAddPartModalOpen(true)}
         >
           Pridėti dalį
         </button>
