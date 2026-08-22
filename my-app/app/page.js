@@ -9,7 +9,9 @@ import { supabase } from "./supabaseClient"; // Importuojame klientą
 import { AddCustomer } from "./services/customers";
 import Card from "./components/Card";
 import { useRouter } from "next/navigation"; // ✅ Add this line
-
+import AddCustomerForm from "./components/AddCustomerForm";
+import AddPartForm from "./components/AddPartForm";
+import CarAddForm from "./components/CarAddForm";
 export default function Home() {
   const router = useRouter();
   const [customers, setCustomers] = useState([]);
@@ -207,146 +209,6 @@ export default function Home() {
     }
   };
 
-  const returnCustomerAddForm = () => {
-    return (
-      <form onSubmit={handleContinueClick} style={style.formContainer}>
-        <div style={style.formInputContainer}>
-          <label style={style.formLabel}>Vardas Pavarde</label>
-          <input
-            style={style.formInput}
-            type="text"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            placeholder="Jonas Jonaitis"
-            minLength={3}
-          />
-          <label style={style.formLabel}>Telefono numeris</label>
-          <input
-            style={style.formInput}
-            type="text"
-            value={customerPhone}
-            onChange={(e) => setCustomerPhone(e.target.value)}
-            placeholder="+37061234567"
-          />
-        </div>
-
-        <div style={style.formButtonContainer}>
-          <button type="submit" style={style.formButton}>
-            Tęsti
-          </button>
-          <button
-            type="button"
-            style={style.formButton}
-            onClick={() => {
-              setShowCustomerForm(false);
-              resetValues();
-            }}
-          >
-            Grįžti
-          </button>
-        </div>
-      </form>
-    );
-  };
-
-  const returnCarAddForm = () => {
-    return (
-      <form onSubmit={handleAddingCarCustomer} style={style.formContainer}>
-        <div style={style.formInputContainer}>
-          <label style={style.formLabel}>Markė</label>
-          <input
-            style={style.formInput}
-            type="text"
-            value={carName}
-            onChange={(e) => setCarName(e.target.value)}
-            placeholder="Mercedes"
-          />
-          <label style={style.formLabel}>Registracijos numeris</label>
-          <input
-            style={style.formInput}
-            type="text"
-            value={registrationNumber}
-            onChange={(e) => setRegistrationNumber(e.target.value)}
-            placeholder="ABC123"
-          />
-          <label style={style.formLabel}>Metai</label>
-          <input
-            style={style.formInput}
-            type="text"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            placeholder="ABC123"
-          />
-        </div>
-
-        <div style={style.formButtonContainer}>
-          <button type="submit" style={style.formButton}>
-            Sukurti
-          </button>
-          <button
-            type="button"
-            style={style.formButton}
-            onClick={() => {
-              prevStep();
-            }}
-          >
-            Grįžti
-          </button>
-        </div>
-      </form>
-    );
-  };
-
-  const returnPartAddForm = () => {
-    return (
-      <form onSubmit={handlePartAdding} style={style.formContainer}>
-        <div style={style.formInputContainer}>
-          <label style={style.formLabel}>Pavadinimas</label>
-          <input
-            style={style.formInput}
-            type="text"
-            value={partName}
-            onChange={(e) => setPartName(e.target.value)}
-            placeholder="Motul 5W30"
-            minLength={3}
-          />
-          <label style={style.formLabel}>Kaina</label>
-          <input
-            style={style.formInput}
-            type="text"
-            value={partPrice}
-            onChange={(e) => setPartPrice(e.target.value)}
-            placeholder="0.00"
-          />
-          <label style={style.formLabel}>Dalies kodas</label>
-          <input
-            style={style.formInput}
-            type="text"
-            value={partNumber}
-            onChange={(e) => setPartNumber(e.target.value)}
-            placeholder="132-123-123"
-          />
-        </div>
-
-        <div style={style.formButtonContainer}>
-          <button type="submit" style={style.formButton}>
-            Sukurti
-          </button>
-          <button
-            type="button"
-            style={style.formButton}
-            onClick={() => {
-              setShowPartForm(false);
-              resetValues();
-            }}
-          >
-            Atšaukti
-          </button>
-        </div>
-      </form>
-    );
-  };
-
   const returnSelectableCustomerList = () => {
     return (
       <>
@@ -448,19 +310,63 @@ export default function Home() {
       </div>
 
       <div style={style.content}>
-        {showPartForm && returnPartAddForm()}
+        {showPartForm && (
+          <AddPartForm
+            partName={partName}
+            setPartName={setPartName}
+            partPrice={partPrice}
+            setPartPrice={setPartPrice}
+            partNumber={partNumber}
+            setPartNumber={setPartNumber}
+            handlePartAdding={handlePartAdding}
+            setShowPartForm={setShowPartForm}
+            resetValues={resetValues}
+          />
+        )}
 
         {showCarForm &&
           ((step === 1 && returnSelectableCustomerList()) ||
-            (step === 2 && returnCarAddForm()))}
+            (step === 2 && (
+              <CarAddForm
+                carName={carName}
+                setCarName={setCarName}
+                registrationNumber={registrationNumber}
+                setRegistrationNumber={setRegistrationNumber}
+                year={year}
+                setYear={setYear}
+                handleAddingCarCustomer={handleAddingCarCustomer}
+                prevStep={prevStep}
+              />
+            )))}
 
         {showOrderForm &&
           ((step === 1 && returnSelectableCustomerList()) ||
             (step === 2 && returnCarListForOrder()))}
 
         {showCustomerForm &&
-          ((step === 1 && returnCustomerAddForm()) ||
-            (step === 2 && returnCarAddForm()))}
+          ((step === 1 && (
+            <AddCustomerForm
+              customerName={customerName}
+              setCustomerName={setCustomerName}
+              customerPhone={customerPhone}
+              setCustomerPhone={setCustomerPhone}
+              handleContinueClick={handleContinueClick}
+              setShowCustomerForm={setShowCustomerForm}
+              resetValues={resetValues}
+            />
+          )) ||
+            (step === 2 && (
+              <CarAddForm
+                carName={carName}
+                setCarName={setCarName}
+                registrationNumber={registrationNumber}
+                setRegistrationNumber={setRegistrationNumber}
+                year={year}
+                setYear={setYear}
+                handleAddingCarCustomer={handleAddingCarCustomer}
+                prevStep={prevStep}
+              />
+            )))}
       </div>
     </div>
   );
