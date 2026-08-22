@@ -4,6 +4,20 @@ import { useRouter } from "next/navigation";
 import Dropdown from "react-bootstrap/Dropdown";
 
 export default function DropDown() {
+  const PATH = {
+    mainPage: "/",
+    customers: "/screens/customers",
+    orders: "/screens/orders",
+    cars: "/screens/cars",
+    parts: "/screens/parts",
+  };
+
+  // const mainPage = "/";
+  // const customers = "/screens/customers";
+  // const orders = "/screens/orders";
+  // const cars = "/screens/cars";
+  // const parts = "/screens/parts";
+
   const router = useRouter();
 
   const handleSelect = (eventKey) => {
@@ -25,11 +39,13 @@ export default function DropDown() {
 
       <Dropdown.Menu>
         {/* Vietoj href rašome savo Next.js puslapių kelius į eventKey */}
-        <Dropdown.Item eventKey="../">Pagrindinis puslapis</Dropdown.Item>
-        <Dropdown.Item eventKey="/screens/customers">Klientai</Dropdown.Item>
-        <Dropdown.Item eventKey="/screens/orders">Užsakymai</Dropdown.Item>
-        <Dropdown.Item eventKey="/screens/cars">Automobiliai</Dropdown.Item>
-        <Dropdown.Item eventKey="/screens/parts">Dalys</Dropdown.Item>
+        <Dropdown.Item eventKey={PATH.mainPage}>
+          Pagrindinis puslapis
+        </Dropdown.Item>
+        <Dropdown.Item eventKey={PATH.customers}>Klientai</Dropdown.Item>
+        <Dropdown.Item eventKey={PATH.orders}>Užsakymai</Dropdown.Item>
+        <Dropdown.Item eventKey={PATH.cars}>Automobiliai</Dropdown.Item>
+        <Dropdown.Item eventKey={PATH.parts}>Dalys</Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>
   );

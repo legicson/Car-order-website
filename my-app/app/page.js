@@ -8,8 +8,10 @@ import AddButtonsRow from "./components/UI/AddButtonsRow";
 import { supabase } from "./supabaseClient"; // Importuojame klientą
 import { AddCustomer } from "./services/customers";
 import Card from "./components/Card";
+import { useRouter } from "next/navigation"; // ✅ Add this line
 
 export default function Home() {
+  const router = useRouter();
   const [customers, setCustomers] = useState([]);
   const [cars, setCars] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -123,19 +125,23 @@ export default function Home() {
   const addOrder = async (car) => {
     if (!car) return;
 
-    const { error } = await supabase.from("orders").insert([
-      {
-        car_id: car.id,
-        income: 0,
-        total_price: 0,
-        status: "Active",
-      },
-    ]);
+    const { data, error } = await supabase
+      .from("orders")
+      .insert([
+        {
+          car_id: car.id,
+          income: 0,
+          total_price: 0,
+          status: "Active",
+        },
+      ])
+      .select();
 
     if (error) {
       console.error("Klaida pridedant uzsakyma:", error.message);
     } else {
       console.log("Uzsakymas sukurtas");
+      return data[0].id;
     }
   };
 
@@ -378,10 +384,11 @@ export default function Home() {
     nextStep();
   };
 
-  const onClickSetSelectedCar = (item) => {
-    addOrder(item);
+  const onClickSetSelectedCar = async (item) => {
+    const orderId = await addOrder(item);
     setShowOrderForm(false);
     resetValues();
+    router.push(`/screens/orders/${orderId}`);
   };
 
   const returnCarListForOrder = () => {
