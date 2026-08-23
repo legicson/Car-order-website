@@ -1,10 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { CardHeader } from "react-bootstrap";
+import { colors, radius, shadow, space } from "../theme";
 
 const Card = ({ id, onClick, header, addionalDetails }) => {
   return (
-    <div onClick={onClick} data-id={id} style={styles.root}>
+    <div
+      onClick={onClick}
+      data-id={id}
+      className={`app-card${onClick ? " app-card-interactive" : ""}`}
+      style={styles.root}
+    >
       <h2 style={styles.cardHeader}>{header}</h2>
       <p style={styles.cardText}>{addionalDetails}</p>
     </div>
@@ -13,36 +18,36 @@ const Card = ({ id, onClick, header, addionalDetails }) => {
 
 const styles = {
   root: {
-    backgroundColor: "white",
-    borderRadius: "20px",
-    height: "4vh",
-    width: "100%",
-    cursor: "pointer",
-    margin: "0.3vh 0",
-    padding: "0 5vh",
-
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    alignContent: "center",
+    gap: space.md,
+    width: "100%",
+    minHeight: "56px",
+    padding: `${space.md} ${space.lg}`,
+    backgroundColor: colors.surface,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radius.lg,
+    boxShadow: shadow.sm,
   },
   cardHeader: {
-    fontSize: "1.5rem",
     margin: 0,
-    padding: 0,
+    fontSize: "1rem",
+    fontWeight: 600,
+    color: colors.text,
   },
   cardText: {
-    fontSize: "1.5rem",
-
     margin: 0,
-    padding: 0,
+    fontSize: "0.9rem",
+    color: colors.textMuted,
   },
 };
 
 Card.propTypes = {
-  children: PropTypes.node.isRequired,
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onClick: PropTypes.func,
-  idNumber: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  header: PropTypes.node,
+  addionalDetails: PropTypes.node,
 };
 
 export default Card;

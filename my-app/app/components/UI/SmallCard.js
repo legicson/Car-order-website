@@ -1,9 +1,10 @@
+import { colors, radius, space } from "../../theme";
+
 function SmallCard({ header, addionalDetails }) {
   return (
     <div style={styles.root}>
-      <h2 style={styles.header}>{header}</h2>
-
-      <p style={styles.addionalDetails}>{addionalDetails}</p>
+      <span style={styles.header}>{header}</span>
+      <span style={styles.addionalDetails}>{addionalDetails}</span>
     </div>
   );
 }
@@ -12,22 +13,21 @@ export default SmallCard;
 
 const styles = {
   root: {
-    backgroundColor: "white",
-    borderRadius: "20px",
-    height: "5vh",
-    width: "25%",
-    cursor: "pointer",
-    margin: "10px 10px",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "space-around",
-    alignItems: "center",
+    gap: "2px",
+    padding: `${space.sm} ${space.md}`,
+    backgroundColor: colors.surfaceAlt,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radius.md,
   },
   header: {
-    fontSize: "1.2rem",
-    fontWeight: "bold",
+    fontSize: "0.95rem",
+    fontWeight: 600,
+    color: colors.text,
   },
   addionalDetails: {
-    fontSize: "1rem",
+    fontSize: "0.85rem",
+    color: colors.textMuted,
   },
 };

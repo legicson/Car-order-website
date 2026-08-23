@@ -1,4 +1,5 @@
 import React from "react";
+import { colors, radius, shadow, space } from "../theme";
 
 const ModalWrapper = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
@@ -11,8 +12,9 @@ const ModalWrapper = ({ isOpen, onClose, children }) => {
       >
         <button
           onClick={onClose}
+          className="app-icon-btn"
           style={styles.closeButton}
-          aria-label="Close modal"
+          aria-label="Uždaryti"
         >
           &times;
         </button>
@@ -25,41 +27,35 @@ const ModalWrapper = ({ isOpen, onClose, children }) => {
 const styles = {
   overlay: {
     position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    inset: 0,
+    backgroundColor: "rgba(15, 23, 42, 0.55)",
+    backdropFilter: "blur(2px)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    padding: space.lg,
     zIndex: 1000,
   },
   modal: {
-    height: "45vh",
-    backgroundColor: "#b2bd68",
-    padding: "20px",
-    borderRadius: "12px",
     position: "relative",
-    width: "50vw",
-
-    boxShell: "0 4px 20px rgba(0, 0, 0, 0.2)",
-    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.2)",
+    width: "100%",
+    maxWidth: "560px",
+    maxHeight: "85vh",
+    overflowY: "auto",
+    backgroundColor: colors.surface,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radius.lg,
+    boxShadow: shadow.lg,
+    padding: `${space.xxl} ${space.xxl} ${space.xl}`,
   },
   closeButton: {
     position: "absolute",
-    top: "10px",
-    right: "15px",
-    border: "none",
-    background: "none",
-    fontSize: "24px",
-    cursor: "pointer",
-    lineHeight: 1,
+    top: space.md,
+    right: space.md,
+    fontSize: "1.5rem",
   },
   content: {
-    // marginTop: "10px",
-    // backgroundColor: "yellow",
-    height: "100%",
+    width: "100%",
   },
 };
 

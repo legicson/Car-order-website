@@ -2,19 +2,14 @@
 
 import { supabase } from "./../../supabaseClient"; // Importuojame klientą
 import { useState, useEffect } from "react";
-import CustomButton from "../../components/UI/CustomButton";
-import AddCustomerModal from "../../components/CustomerForm";
-import ModalWrapper from "./../../components/ModalWrapper";
 import CarCard from "./../../components/CarCard";
-
-import Card from "./../../components/Card";
-import CustomerForm from "./../../components/CustomerForm";
-import CustomerDetailedForm from "./../../components/CustomerDetailedForm";
-import CarForm from "./../../components/CarForm";
 import Dropdown from "../../components/UI/Dropdown";
+import SearchInput from "../../components/UI/SearchInput";
+import { layout, space, text } from "../../theme";
 
 export default function cars({ children }) {
   const [cars, setCars] = useState([]);
+  const [search, setSearch] = useState("");
 
   const fetchCars = async () => {
     const { data: cars, error } = await supabase.from("cars").select(`
@@ -28,51 +23,88 @@ export default function cars({ children }) {
     }
 
     setCars(cars);
-    console.log(cars);
   };
 
   useEffect(() => {
     fetchCars();
-    console.log(cars);
   }, []);
 
+  const query = search.trim().toLowerCase();
+
+  const filteredCars = query
+    ? cars.filter((car) =>
+        [
+          car.car_name,
+          car.registration_no,
+          car.vin,
+          car.year,
+          car.customers?.name,
+        ].some((field) => String(field ?? "").toLowerCase().includes(query)),
+      )
+    : cars;
+
   return (
-    <div style={styles.root}>
-      <div style={styles.content}>
-        <h2>Cars Page</h2>
-        {cars.map((car) => (
-          <CarCard
-            key={car.id}
-            id={car.id}
-            carName={car.car_name}
-            customerName={car.customers.name}
-            registrationNumber={car.registration_no}
-            year={car.year}
-            vin={car.vin}
-            onClick={() => {}}
-            onClickDelete={() => {}}
+    <div style={layout.page}>
+      <div style={layout.header}>
+        <div>
+          <h1 style={text.pageTitle}>Automobiliai</h1>
+          <p style={styles.subtitle}>
+            {query
+              ? `Rasta ${filteredCars.length} iš ${cars.length}`
+              : `${cars.length} ${cars.length === 1 ? "automobilis" : "automobiliai"}`}
+          </p>
+        </div>
+        <Dropdown />
+      </div>
+
+      {cars.length > 0 && (
+        <div style={styles.toolbar}>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Ieškoti pagal markę, numerį, VIN, metus ar klientą"
+            label="Ieškoti automobilių"
           />
-        ))}
+        </div>
+      )}
+
+      <div style={layout.list}>
+        {cars.length === 0 ? (
+          <p style={layout.emptyState}>Automobilių dar nėra</p>
+        ) : filteredCars.length === 0 ? (
+          <p style={layout.emptyState}>
+            Pagal „{search.trim()}“ automobilių nerasta
+          </p>
+        ) : (
+          filteredCars.map((car) => (
+            <CarCard
+              key={car.id}
+              id={car.id}
+              carName={car.car_name}
+              customerName={car.customers?.name}
+              registrationNumber={car.registration_no}
+              year={car.year}
+              vin={car.vin}
+              onClick={() => {}}
+              onClickDelete={() => {}}
+            />
+          ))
+        )}
       </div>
     </div>
   );
 }
 
 const styles = {
-  root: {
-    display: "flex",
-    flex: 1,
-    flexDirection: "column",
-    // backgroundColor: "#9d4c19",
-    width: "90%",
+  subtitle: {
+    ...text.muted,
+    margin: "4px 0 0",
   },
-
-  content: {
+  toolbar: {
     display: "flex",
-    flex: 1,
-    flexDirection: "column",
-    // backgroundColor: "green",
-    justifyContent: "flex-start",
+    flexWrap: "wrap",
     alignItems: "center",
+    gap: space.md,
+    width: "100%",
   },
 };

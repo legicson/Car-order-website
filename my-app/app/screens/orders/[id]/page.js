@@ -3,7 +3,7 @@ import { supabase } from "./../../../supabaseClient"; // Importuojame klientą
 import { use, useState, useEffect } from "react";
 import CustomerCarInfo from "../../../components/CustomerCarInfo";
 import PartsCard from "../../../components/PartsCard";
-import CustomButton from "../../../components/UI/CustomButton";
+import { colors, layout, radius, shadow, space, text } from "../../../theme";
 
 export default function orderList({ params }) {
   const [showPartAddingSection, setShowPartAddingSection] = useState(false);
@@ -25,7 +25,6 @@ export default function orderList({ params }) {
 
   useEffect(() => {
     fetchOrderItems();
-    console.log("Order items fetched:", orderItems);
   }, [showPartAddingSection]);
 
   useEffect(() => {
@@ -83,7 +82,7 @@ export default function orderList({ params }) {
     setShowPartAddingSection(false);
     setShowAddedParts(true);
     addedParts.forEach(async (part) => {
-      const { data, error } = await supabase.from("order_items").insert([
+      const { error } = await supabase.from("order_items").insert([
         {
           order_id: id,
           part_id: part.id,
@@ -95,8 +94,6 @@ export default function orderList({ params }) {
       if (error) {
         console.error("Klaida pridedant užsakymo elementą:", error.message);
       } else {
-        console.log("Užsakymo elementas pridėtas:", data);
-
         setAddedParts([]);
         fetchOrderItems();
       }
@@ -146,11 +143,11 @@ export default function orderList({ params }) {
         header={part.partName}
         details={
           <>
-            <p>Part Number: {part.partNumber}</p>
-            <p>Quantity: {part.quantity}</p>
+            <p>Kodas: {part.partNumber}</p>
+            <p>Kiekis: {part.quantity}</p>
           </>
         }
-        price={`Price: ${part.price}`}
+        price={`${part.price} €`}
       />
     ));
   };
@@ -158,8 +155,20 @@ export default function orderList({ params }) {
   const returnPartAddingSection = () => {
     return (
       <div style={styles.partAddingSection}>
-        <div style={styles.leftSection}>{returnAvailableParts()}</div>
-        <div style={styles.rightSection}>{returnAddedParts()}</div>
+        <div style={styles.column}>
+          <h2 style={text.sectionTitle}>Galimos dalys</h2>
+          <div style={layout.list}>{returnAvailableParts()}</div>
+        </div>
+        <div style={styles.column}>
+          <h2 style={text.sectionTitle}>Pasirinktos dalys</h2>
+          <div style={layout.list}>
+            {addedParts.length === 0 ? (
+              <p style={layout.emptyState}>Dar nieko nepasirinkta</p>
+            ) : (
+              returnAddedParts()
+            )}
+          </div>
+        </div>
       </div>
     );
   };
@@ -195,13 +204,14 @@ export default function orderList({ params }) {
       setAddedParts(addedParts.filter((part) => part.id !== id));
     }
   };
+
   const returnAvailableParts = () => {
     return parts.map((part) => (
       <PartsCard
         key={part.id}
         header={part.partName}
-        details={<p>Part Number: {part.partNumber}</p>}
-        price={`Price: ${part.price}`}
+        details={<p>Kodas: {part.partNumber}</p>}
+        price={`${part.price} €`}
         onClick={() => selectCard(part.id)}
       />
     ));
@@ -214,68 +224,127 @@ export default function orderList({ params }) {
         onDelete={() => deleteOrderItem(orderItem.id)}
         header={
           parts.find((part) => part.id === orderItem.part_id)?.partName ||
-          "Unknown Part"
+          "Nežinoma dalis"
         }
         details={
           <>
             <p>
-              Part Number:{" "}
+              Kodas:{" "}
               {parts.find((part) => part.id === orderItem.part_id)
-                ?.partNumber || "Unknown Part"}
+                ?.partNumber || "-"}
             </p>
-            <p>Quantity: {orderItem.quantity}</p>
+            <p>Kiekis: {orderItem.quantity}</p>
           </>
         }
-        price={`Price: ${orderItem.price_at_sale}`}
+        price={`${orderItem.price_at_sale} €`}
       />
     ));
   };
+
   return (
-    <div style={styles.root}>
+    <div style={layout.page}>
       <div style={styles.dashboard}>
+        <div style={styles.dashboardTop}>
+          <h1 style={text.pageTitle}>Užsakymas #{id}</h1>
+          <div style={styles.dashboardActions}>
+            <button
+              className="app-btn app-btn-secondary"
+              onClick={() => {
+                setShowPartAddingSection(!showPartAddingSection);
+                setShowAddedParts(!showAddedParts);
+              }}
+            >
+              Pridėti dalis
+            </button>
+            <button className="app-btn app-btn-primary" onClick={addOrderItems}>
+              Išsaugoti
+            </button>
+          </div>
+        </div>
+
         <CustomerCarInfo customer={customer} car={car} />
-        <p>Total: {totalPrice}</p>
-        <CustomButton onClick={addOrderItems} ButtonText={"Save"} />
-        <CustomButton
-          onClick={() => {
-            setShowPartAddingSection(!showPartAddingSection);
-            setShowAddedParts(!showAddedParts);
-          }}
-          ButtonText={"Add Parts"}
-        />
+
+        <div style={styles.totalRow}>
+          <span style={styles.totalLabel}>Bendra suma</span>
+          <span style={styles.totalValue}>{totalPrice} €</span>
+        </div>
       </div>
+
       <div style={styles.content}>
         {showPartAddingSection && returnPartAddingSection()}
-        {showAddedParts && showOrderItems()}
+        {showAddedParts && (
+          <div style={styles.column}>
+            <h2 style={text.sectionTitle}>Užsakymo dalys</h2>
+            <div style={layout.list}>
+              {orderItems.length === 0 ? (
+                <p style={layout.emptyState}>Dalių dar nepridėta</p>
+              ) : (
+                showOrderItems()
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 const styles = {
-  root: {
+  dashboard: {
     display: "flex",
     flexDirection: "column",
-    flex: 1,
-    width: "100%",
+    gap: space.xl,
+    padding: space.xl,
+    backgroundColor: colors.surface,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radius.lg,
+    boxShadow: shadow.sm,
   },
-  dashboard: {
-    flex: 1,
-    backgroundColor: "#f0f0f0",
+  dashboardTop: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: space.md,
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  dashboardActions: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: space.sm,
+  },
+  totalRow: {
+    display: "flex",
+    alignItems: "baseline",
+    justifyContent: "space-between",
+    gap: space.md,
+    paddingTop: space.lg,
+    borderTop: `1px solid ${colors.border}`,
+  },
+  totalLabel: {
+    ...text.label,
+  },
+  totalValue: {
+    fontSize: "1.5rem",
+    fontWeight: 700,
+    fontVariantNumeric: "tabular-nums",
+    color: colors.text,
   },
   content: {
-    flex: 5,
-    backgroundColor: "#b34c4c",
+    display: "flex",
+    flexDirection: "column",
+    gap: space.xl,
+    width: "100%",
   },
   partAddingSection: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+    gap: space.xl,
+    width: "100%",
+  },
+  column: {
     display: "flex",
-  },
-  leftSection: {
-    flex: 1,
-    backgroundColor: "#e0e0e0",
-  },
-  rightSection: {
-    flex: 1,
-    backgroundColor: "#d0d0d0",
+    flexDirection: "column",
+    gap: space.md,
+    minWidth: 0,
   },
 };

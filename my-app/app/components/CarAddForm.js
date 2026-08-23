@@ -1,5 +1,7 @@
 "use client";
 
+import formStyles from "./UI/formStyles";
+
 export default function CarAddForm({
   carName,
   setCarName,
@@ -10,87 +12,52 @@ export default function CarAddForm({
   handleAddingCarCustomer,
   prevStep,
 }) {
-  const style = {
-    formContainer: {
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "space-between",
-      backgroundColor: " #41bb7e",
-      borderRadius: "20px",
-      width: "50%",
-      height: "40vh",
-      marginTop: "10%",
-    },
-    formInputContainer: {
-      display: "flex",
-      flex: 1,
-      width: "100%",
-      flexDirection: "column",
-      alignItems: "center",
-    },
-    formLabel: {
-      width: "50%",
-      margin: "10px",
-      textAlign: "center",
-      fontWeight: "bold",
-    },
-    formInput: {
-      width: "50%",
-      margin: "10px",
-      textAlign: "center",
-      borderRadius: "20px",
-    },
-    formButtonContainer: {
-      display: "flex",
-      width: "100%",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    formButton: {
-      borderRadius: "20px",
-      width: "30%",
-      height: "50px",
-      margin: "10px",
-    },
-  };
-
   return (
-    <form onSubmit={handleAddingCarCustomer} style={style.formContainer}>
-      <div style={style.formInputContainer}>
-        <label style={style.formLabel}>Markė</label>
-        <input
-          style={style.formInput}
-          type="text"
-          value={carName}
-          onChange={(e) => setCarName(e.target.value)}
-          placeholder="Mercedes"
-        />
-        <label style={style.formLabel}>Registracijos numeris</label>
-        <input
-          style={style.formInput}
-          type="text"
-          value={registrationNumber}
-          onChange={(e) => setRegistrationNumber(e.target.value)}
-          placeholder="ABC123"
-        />
-        <label style={style.formLabel}>Metai</label>
-        <input
-          style={style.formInput}
-          type="text"
-          value={year}
-          onChange={(e) => setYear(e.target.value)}
-          placeholder="2020"
-        />
+    <form onSubmit={handleAddingCarCustomer} style={formStyles.card}>
+      <h2 style={formStyles.title}>Naujas automobilis</h2>
+
+      <div style={formStyles.fields}>
+        <div style={formStyles.field}>
+          <label style={formStyles.label}>Markė</label>
+          <input
+            className="app-input"
+            type="text"
+            value={carName}
+            onChange={(e) => setCarName(e.target.value)}
+            placeholder="Mercedes"
+          />
+        </div>
+
+        <div style={formStyles.field}>
+          <label style={formStyles.label}>Registracijos numeris</label>
+          <input
+            className="app-input"
+            type="text"
+            value={registrationNumber}
+            onChange={(e) => setRegistrationNumber(e.target.value)}
+            placeholder="ABC123"
+          />
+        </div>
+
+        <div style={formStyles.field}>
+          <label style={formStyles.label}>Metai</label>
+          <input
+            className="app-input"
+            type="text"
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            placeholder="2020"
+          />
+        </div>
       </div>
 
-      <div style={style.formButtonContainer}>
-        <button type="submit" style={style.formButton}>
+      <div style={formStyles.buttonRow}>
+        <button type="submit" className="app-btn app-btn-primary">
           Sukurti
         </button>
         <button
           type="button"
-          style={style.formButton}
+          className="app-btn app-btn-secondary"
           onClick={() => {
             prevStep();
           }}

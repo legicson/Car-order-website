@@ -1,10 +1,8 @@
-import ListDropdown from "./UI/ListDropdown";
+import formStyles from "./UI/formStyles";
 
 function CarForm({
   year,
   setYear,
-  userId,
-  setUserId,
   handleCarAdding,
   setModal,
   carName,
@@ -13,47 +11,61 @@ function CarForm({
   setRegistrationNumber,
 }) {
   return (
-    <form style={styles.formContent} onSubmit={handleCarAdding}>
-      <div style={styles.formInput}>
-        <label htmlFor="customerName">Automobilio markė:</label> <br />
-        <input
-          id="carName"
-          placeholder="Mercedes..."
-          value={carName}
-          onChange={(e) => setCarName(e.target.value)}
-          style={styles.modalInput}
-          minLength={2}
-        />
-        <label htmlFor="registrationNumber">Registracijos numeris:</label>{" "}
-        <br />
-        <input
-          id="registrationNumber"
-          placeholder="ABC123"
-          value={registrationNumber}
-          onChange={(e) => setRegistrationNumber(e.target.value)}
-          style={styles.modalInput}
-          type="text"
-          minLength={2}
-        />
-        <label htmlFor="year">Registracijos numeris:</label> <br />
-        <input
-          id="year"
-          placeholder="2026"
-          value={year}
-          onChange={(e) => setYear(e.target.value)}
-          style={styles.modalInput}
-          type="text"
-          // minLength={6}
-        />
+    <form style={formStyles.modal} onSubmit={handleCarAdding}>
+      <h2 style={formStyles.title}>Automobilis</h2>
+
+      <div style={formStyles.fields}>
+        <div style={formStyles.field}>
+          <label style={formStyles.label} htmlFor="carName">
+            Automobilio markė
+          </label>
+          <input
+            id="carName"
+            className="app-input"
+            placeholder="Mercedes..."
+            value={carName}
+            onChange={(e) => setCarName(e.target.value)}
+            minLength={2}
+          />
+        </div>
+
+        <div style={formStyles.field}>
+          <label style={formStyles.label} htmlFor="registrationNumber">
+            Registracijos numeris
+          </label>
+          <input
+            id="registrationNumber"
+            className="app-input"
+            placeholder="ABC123"
+            value={registrationNumber}
+            onChange={(e) => setRegistrationNumber(e.target.value)}
+            type="text"
+            minLength={2}
+          />
+        </div>
+
+        <div style={formStyles.field}>
+          <label style={formStyles.label} htmlFor="year">
+            Metai
+          </label>
+          <input
+            id="year"
+            className="app-input"
+            placeholder="2026"
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            type="text"
+          />
+        </div>
       </div>
 
-      <div style={styles.modalButtonsContainer}>
-        <button type="submit" style={styles.modalButton}>
+      <div style={formStyles.buttonRow}>
+        <button type="submit" className="app-btn app-btn-primary">
           Išsaugoti pakeitimus
         </button>
         <button
           type="button"
-          style={styles.modalButton}
+          className="app-btn app-btn-secondary"
           onClick={() => {
             setModal(false);
           }}
@@ -66,58 +78,3 @@ function CarForm({
 }
 
 export default CarForm;
-
-const styles = {
-  root: {
-    display: "flex",
-    flex: 1,
-    flexDirection: "column",
-    // backgroundColor: "#9d4c19",
-    width: "90%",
-  },
-  pageContent: {
-    // display:"flex",
-    // flexDirection:"row",
-    // flex:1,
-    // margin: 50,
-  },
-
-  modalButtonsContainer: {
-    display: "flex",
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalButton: {
-    borderRadius: "20px",
-    width: "30%",
-    height: "50px",
-    margin: "10px",
-  },
-  modalInput: {
-    width: "80%",
-    height: "40px",
-    borderRadius: "10px",
-    textAlign: "center",
-    fontSize: "25px",
-  },
-  formContent: {
-    // margin: "7%",
-    display: "flex",
-    flexDirection: "column",
-    // justifyContent: "center",
-    // alignItems: "center",
-    height: "100%",
-
-    // backgroundColor: "red",
-  },
-  formInput: {
-    display: "flex",
-    flex: 1,
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    // height: "100%",
-    // width: "100%",
-  },
-};

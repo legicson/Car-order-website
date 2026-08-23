@@ -2,38 +2,31 @@
 
 import Dropdown from "./components/UI/Dropdown";
 import { useState, useEffect } from "react";
-import { button, Modal, Form } from "react-bootstrap";
-import AddCustomerModal from "./components/CustomerForm";
 import AddButtonsRow from "./components/UI/AddButtonsRow";
 import { supabase } from "./supabaseClient"; // Importuojame klientą
-import { AddCustomer } from "./services/customers";
 import Card from "./components/Card";
-import { useRouter } from "next/navigation"; // ✅ Add this line
+import { useRouter } from "next/navigation";
 import AddCustomerForm from "./components/AddCustomerForm";
 import AddPartForm from "./components/AddPartForm";
 import CarAddForm from "./components/CarAddForm";
+import { layout, text } from "./theme";
 
 export default function Home() {
   const router = useRouter();
   const [customers, setCustomers] = useState([]);
   const [cars, setCars] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [parts, setParts] = useState([]);
 
   const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [step, setStep] = useState(1);
-  const [custId, setCustId] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
 
   const [carName, setCarName] = useState("");
   const [registrationNumber, setRegistrationNumber] = useState("");
   const [year, setYear] = useState("");
-  const [vin, setVin] = useState("");
 
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [selectedCar, setSelectedCar] = useState(null);
 
   const [showCarForm, setShowCarForm] = useState(false);
 
@@ -43,13 +36,11 @@ export default function Home() {
   const [partNumber, setPartNumber] = useState("");
 
   const resetValues = () => {
-    setCustId("");
     setCustomerName("");
     setCustomerPhone("");
     setCarName("");
     setRegistrationNumber("");
     setYear("");
-    setVin("");
     setSelectedCustomer(null);
     setStep(1);
     setShowCustomerForm(false);
@@ -64,7 +55,6 @@ export default function Home() {
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
 
-  const [showOrderCreation, setShowOrderCreation] = useState(false);
   const fetchUsers = async () => {
     const { data, error } = await supabase.from("customers").select("*");
 
@@ -101,7 +91,6 @@ export default function Home() {
     if (error) {
       console.error("Klaida pridedant vartotoją:", error.message);
     } else {
-      console.log("Vartotojas pridedas");
       return data[0].id;
     }
   };
@@ -120,8 +109,6 @@ export default function Home() {
 
     if (error) {
       console.error("Klaida pridedant automobilį:", error.message);
-    } else {
-      console.log("Automobilis pridedas");
     }
   };
 
@@ -143,15 +130,8 @@ export default function Home() {
     if (error) {
       console.error("Klaida pridedant uzsakyma:", error.message);
     } else {
-      console.log("Uzsakymas sukurtas");
       return data[0].id;
     }
-  };
-
-  const toFloat = (value) => {
-    if (typeof value !== "string") return NaN;
-    const normalized = value.trim().replace(",", ".");
-    return parseFloat(normalized);
   };
 
   const addPart = async () => {
@@ -167,8 +147,6 @@ export default function Home() {
 
     if (error) {
       console.error("Klaida pridedant dali:", error.message);
-    } else {
-      console.log("Dalis sukurta");
     }
   };
 
@@ -191,8 +169,6 @@ export default function Home() {
   const handleAddingCarCustomer = async (e) => {
     e.preventDefault();
 
-    // const newCustomerId = await addCustomer();
-
     let newCustomerId;
     if (showCarForm) {
       newCustomerId = selectedCustomer.id;
@@ -212,33 +188,38 @@ export default function Home() {
 
   const returnSelectableCustomerList = () => {
     return (
-      <>
-        {showOrderForm ? (
-          <h2>Pasirinkite klientą naujam užsakymui</h2>
-        ) : (
-          <h2>Pasirinkite klientą kuriam norite prideti automobili</h2>
-        )}
-        {customers.map((customer) => (
-          <div style={style.listContainer} key={customer.id}>
+      <div style={style.picker}>
+        <h2 style={style.pickerTitle}>
+          {showOrderForm
+            ? "Pasirinkite klientą naujam užsakymui"
+            : "Pasirinkite klientą, kuriam norite pridėti automobilį"}
+        </h2>
+
+        <div style={layout.list}>
+          {customers.map((customer) => (
             <Card
+              key={customer.id}
               id={customer.id}
               header={customer.name}
               addionalDetails={customer.phone_number}
               onClick={() => onClickSetSelectedCustomer(customer)}
             />
-          </div>
-        ))}
-        <button
-          type="button"
-          style={style.formButton}
-          onClick={() => {
-            setShowOrderForm(false);
-            resetValues();
-          }}
-        >
-          Atšaukti
-        </button>
-      </>
+          ))}
+        </div>
+
+        <div style={style.pickerActions}>
+          <button
+            type="button"
+            className="app-btn app-btn-secondary"
+            onClick={() => {
+              setShowOrderForm(false);
+              resetValues();
+            }}
+          >
+            Atšaukti
+          </button>
+        </div>
+      </div>
     );
   };
 
@@ -260,58 +241,76 @@ export default function Home() {
       (car) => car.user_id === selectedCustomer.id,
     );
     return (
-      <>
-        <h2>Pasirinkite automobilį</h2>
-        {customerCars.map((car) => (
-          <div style={style.listContainer} key={car.id}>
-            <Card
-              id={car.id}
-              header={car.car_name}
-              addionalDetails={car.registration_no}
-              onClick={() => {
-                onClickSetSelectedCar(car);
-              }}
-            />
-          </div>
-        ))}
-        <button
-          type="button"
-          style={style.formButton}
-          onClick={() => {
-            prevStep();
-          }}
-        >
-          Grįžti
-        </button>
-        <button
-          type="button"
-          style={style.formButton}
-          onClick={() => {
-            setShowOrderForm(false);
-            resetValues();
-          }}
-        >
-          Atšaukti
-        </button>
-      </>
+      <div style={style.picker}>
+        <h2 style={style.pickerTitle}>Pasirinkite automobilį</h2>
+
+        <div style={layout.list}>
+          {customerCars.length === 0 ? (
+            <p style={layout.emptyState}>
+              Šis klientas dar neturi pridėtų automobilių
+            </p>
+          ) : (
+            customerCars.map((car) => (
+              <Card
+                key={car.id}
+                id={car.id}
+                header={car.car_name}
+                addionalDetails={car.registration_no}
+                onClick={() => {
+                  onClickSetSelectedCar(car);
+                }}
+              />
+            ))
+          )}
+        </div>
+
+        <div style={style.pickerActions}>
+          <button
+            type="button"
+            className="app-btn app-btn-secondary"
+            onClick={() => {
+              prevStep();
+            }}
+          >
+            Grįžti
+          </button>
+          <button
+            type="button"
+            className="app-btn app-btn-secondary"
+            onClick={() => {
+              setShowOrderForm(false);
+              resetValues();
+            }}
+          >
+            Atšaukti
+          </button>
+        </div>
+      </div>
     );
   };
 
   return (
-    <div style={style.root}>
-      <div>
-        {!showOrderForm && !showCustomerForm && !showCarForm && (
-          <>
-            <AddButtonsRow
-              setAddCustomerModalOpen={setShowCustomerForm}
-              setAddOrderModalOpen={setShowOrderForm}
-              setAddCarModalOpen={setShowCarForm}
-              setAddPartModalOpen={setShowPartForm}
-            />
+    <div style={layout.page}>
+      {!showOrderForm && !showCustomerForm && !showCarForm && (
+        <>
+          <div style={layout.header}>
+            <div>
+              <h1 style={text.pageTitle}>Pagrindinis puslapis</h1>
+              <p style={style.subtitle}>
+                Sukurkite užsakymą arba papildykite serviso duomenis
+              </p>
+            </div>
             <Dropdown />
-          </>
-        )}
-      </div>
+          </div>
+
+          <AddButtonsRow
+            setAddCustomerModalOpen={setShowCustomerForm}
+            setAddOrderModalOpen={setShowOrderForm}
+            setAddCarModalOpen={setShowCarForm}
+            setAddPartModalOpen={setShowPartForm}
+          />
+        </>
+      )}
 
       <div style={style.content}>
         {showPartForm && (
@@ -377,88 +376,29 @@ export default function Home() {
 }
 
 const style = {
-  root: {
-    display: "flex",
-    flex: 1,
-    flexDirection: "column",
-    // backgroundColor: "#9d4c19",
-    width: "90%",
-  },
-  addButton: {
-    borderRadius: "20px",
-    margin: "10px",
-    width: "200px",
-    height: "50px",
-    backgroundColor: "#41bb7e",
-  },
-  buttonRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginTop: "20px",
+  subtitle: {
+    ...text.muted,
+    margin: "4px 0 0",
   },
   content: {
     display: "flex",
-    flex: 1,
-    flexDirection: "column",
-    // backgroundColor: "green",
-    justifyContent: "flex-start",
-    alignItems: "center",
-  },
-  formContainer: {
-    display: "flex",
-    // flex: 1,
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: " #41bb7e",
-    borderRadius: "20px",
-    // height: "10vh",
-    width: "50%",
-    height: "40vh",
-    marginTop: "10%",
-  },
-
-  formInnerContainer: {
-    display: "flex",
-    flexDirection: "column",
-    // alignItems:"center",
-    justifyContent: "space-between",
-    height: "100%",
-    width: "50%",
-  },
-  formLabel: {
-    width: "50%",
-    margin: "10px",
-    textAlign: "center",
-    fontWeight: "bold",
-  },
-  formInput: {
-    width: "50%",
-    margin: "10px",
-    textAlign: "center",
-    borderRadius: "20px",
-  },
-
-  formButtonContainer: {
-    display: "flex",
     width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
   },
-  formButton: {
-    borderRadius: "20px",
-    width: "30%",
-    height: "50px",
-    margin: "10px",
-  },
-  formInputContainer: {
+  picker: {
     display: "flex",
-    flex: 1,
-    width: "100%",
     flexDirection: "column",
-    alignItems: "center",
-  },
-  listContainer: {
+    gap: "16px",
     width: "100%",
+    maxWidth: "620px",
+  },
+  pickerTitle: {
+    ...text.pageTitle,
+    fontSize: "1.35rem",
+  },
+  pickerActions: {
+    display: "flex",
+    gap: "8px",
   },
 };

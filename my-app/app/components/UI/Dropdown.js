@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Dropdown from "react-bootstrap/Dropdown";
+import { colors, radius, shadow } from "../../theme";
 
 export default function DropDown() {
   const PATH = {
@@ -11,12 +12,6 @@ export default function DropDown() {
     cars: "/screens/cars",
     parts: "/screens/parts",
   };
-
-  // const mainPage = "/";
-  // const customers = "/screens/customers";
-  // const orders = "/screens/orders";
-  // const cars = "/screens/cars";
-  // const parts = "/screens/parts";
 
   const router = useRouter();
 
@@ -28,13 +23,9 @@ export default function DropDown() {
   };
 
   return (
-    <Dropdown style={style.dropdown} onSelect={handleSelect}>
-      <Dropdown.Toggle
-        style={style.mainButton}
-        // variant="success"
-        id="dropdown-basic"
-      >
-        Menu
+    <Dropdown onSelect={handleSelect} align="end">
+      <Dropdown.Toggle style={style.mainButton} id="dropdown-basic">
+        Meniu
       </Dropdown.Toggle>
 
       <Dropdown.Menu>
@@ -52,19 +43,14 @@ export default function DropDown() {
 }
 
 const style = {
-  dropdown: {
-    position: "absolute",
-    top: "5vh",
-    right: "5vh",
-    // backgroundColor: "#850c0c",
-    // width: "100%",
-    // marginLeft: "5vh",
-    // marginTop: "2vh",
-  },
   mainButton: {
-    borderRadius: "20px",
-    padding: "10px 30px",
-    backgroundColor: "#134469ff",
-    border: "none",
+    backgroundColor: colors.surface,
+    border: `1px solid ${colors.borderStrong}`,
+    borderRadius: radius.md,
+    boxShadow: shadow.sm,
+    color: colors.text,
+    fontSize: "0.95rem",
+    fontWeight: 600,
+    padding: "9px 18px",
   },
 };

@@ -1,6 +1,8 @@
 import { supabase } from "../supabaseClient";
 import { useState, useEffect } from "react";
 import SmallCard from "./UI/SmallCard";
+import formStyles from "./UI/formStyles";
+import { colors, space, text } from "../theme";
 
 function CustomerDetailedForm({
   setModal,
@@ -34,11 +36,7 @@ function CustomerDetailedForm({
 
   const returnCarCards = () => {
     return cars.map((car) => (
-      <SmallCard
-        key={car.id}
-        header={car.car_name}
-        addionalDetails={car.year}
-      />
+      <SmallCard key={car.id} header={car.car_name} addionalDetails={car.year} />
     ));
   };
 
@@ -71,48 +69,65 @@ function CustomerDetailedForm({
   };
 
   return (
-    <form style={styles.formContent} onSubmit={handleCustomerChange}>
-      <div style={styles.formInput}>
-        <label htmlFor="customerName">Kliento vardas:</label>
-        <input
-          id="customerName"
-          placeholder="Kliento vardas"
-          value={customerName}
-          onChange={(e) => setCustomerName(e.target.value)}
-          style={styles.modalInput}
-          minLength={3}
-        />
-        <label htmlFor="customerPhone">Telefono numeris:</label>
-        <input
-          id="customerPhone"
-          placeholder="Telefono numeris"
-          value={customerPhone}
-          onChange={(e) => setCustomerPhone(e.target.value)}
-          style={styles.modalInput}
-          type="text"
-          //   minLength={6}
-        />
-      </div>
-      <h2 style={styles.carsHeader}>Automobiliai</h2>
-      <div style={styles.carsContainer}>{returnCarCards()}</div>
+    <form style={formStyles.modal} onSubmit={handleCustomerChange}>
+      <h2 style={formStyles.title}>Kliento informacija</h2>
 
-      <div style={styles.modalButtonsContainer}>
-        <button type="submit" style={styles.modalButton}>
+      <div style={formStyles.fields}>
+        <div style={formStyles.field}>
+          <label style={formStyles.label} htmlFor="customerName">
+            Kliento vardas
+          </label>
+          <input
+            id="customerName"
+            className="app-input"
+            placeholder="Kliento vardas"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+            minLength={3}
+          />
+        </div>
+
+        <div style={formStyles.field}>
+          <label style={formStyles.label} htmlFor="customerPhone">
+            Telefono numeris
+          </label>
+          <input
+            id="customerPhone"
+            className="app-input"
+            placeholder="Telefono numeris"
+            value={customerPhone}
+            onChange={(e) => setCustomerPhone(e.target.value)}
+            type="text"
+          />
+        </div>
+      </div>
+
+      <div style={styles.carsSection}>
+        <h3 style={text.sectionTitle}>Automobiliai</h3>
+        {cars.length === 0 ? (
+          <p style={styles.emptyCars}>Automobilių dar nėra</p>
+        ) : (
+          <div style={styles.carsContainer}>{returnCarCards()}</div>
+        )}
+      </div>
+
+      <div style={formStyles.buttonRow}>
+        <button type="submit" className="app-btn app-btn-primary">
           Išsaugoti pakeitimus
         </button>
         <button
           type="button"
-          style={styles.modalButton}
-          onClick={() => setModal(false)}
-        >
-          Uždaryti
-        </button>
-        <button
-          type="button"
-          style={styles.modalButton}
+          className="app-btn app-btn-secondary"
           onClick={addAdditionalCar}
         >
           Pridėti automobilį
+        </button>
+        <button
+          type="button"
+          className="app-btn app-btn-secondary"
+          onClick={() => setModal(false)}
+        >
+          Uždaryti
         </button>
       </div>
     </form>
@@ -122,43 +137,20 @@ function CustomerDetailedForm({
 export default CustomerDetailedForm;
 
 const styles = {
-  modalButtonsContainer: {
-    display: "flex",
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: "20px",
-  },
-  modalButton: {
-    borderRadius: "20px",
-    width: "45%",
-    height: "40px",
-    margin: "5px",
-  },
-  modalInput: {
-    width: "100%",
-    height: "40px",
-    borderRadius: "10px",
-    textAlign: "center",
-    fontSize: "18px",
-    marginBottom: "10px",
-  },
-  formContent: {
-    display: "flex",
-    height: "100%",
-
-    flexDirection: "column",
-  },
-  formInput: {
-    flex: 1,
+  carsSection: {
     display: "flex",
     flexDirection: "column",
-    alignItems: "flex-start",
+    gap: space.md,
+    paddingTop: space.lg,
+    borderTop: `1px solid ${colors.border}`,
   },
   carsContainer: {
-    display: "flex",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+    gap: space.sm,
   },
-  carsHeader: {
-    textAlign: "center",
+  emptyCars: {
+    ...text.muted,
+    margin: 0,
   },
 };

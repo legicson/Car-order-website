@@ -1,17 +1,18 @@
 "use client";
-import AddPartModal from "@/app/components/AddPartModal";
+
 import CustomButton from "@/app/components/UI/CustomButton";
 import AddPartForm from "@/app/components/AddPartForm";
 import { useState, useEffect } from "react";
 import PartsCard from "@/app/components/PartsCard";
 import Dropdown from "@/app/components/UI/Dropdown";
+import { layout, space, text } from "@/app/theme";
 
-// import { supabase }  from "./../../supabaseClient"; // Importuojame klientą
 import { supabase } from "../../supabaseClient";
 
 export default function cars({ children }) {
   const [showPartForm, setShowPartForm] = useState(false);
   const [parts, setParts] = useState([]);
+  const [search, setSearch] = useState("");
 
   const [partName, setPartName] = useState("");
   const [partPrice, setPartPrice] = useState("");
@@ -19,7 +20,7 @@ export default function cars({ children }) {
 
   const addPart = async () => {
     const normalizedPrice = parseFloat(String(partPrice).replace(",", "."));
-    const { data, error } = await supabase.from("parts").insert([
+    const { error } = await supabase.from("parts").insert([
       {
         partName: partName,
         price: normalizedPrice,
@@ -30,7 +31,6 @@ export default function cars({ children }) {
     if (error) {
       console.error("Klaida pridedant dalį:", error.message);
     } else {
-      console.log("Dalys sėkmingai pridėta:", data);
       setShowPartForm(false);
       resetValues();
       fetchParts(); // Atkuriame dalis po pridėjimo
@@ -48,6 +48,7 @@ export default function cars({ children }) {
     setPartPrice("");
     setPartNumber("");
   };
+
   const fetchParts = async () => {
     const { data, error } = await supabase.from("parts").select("*");
 
@@ -60,11 +61,20 @@ export default function cars({ children }) {
 
   useEffect(() => {
     fetchParts();
-    console.log(parts);
   }, [showPartForm]);
 
+  const query = search.trim().toLowerCase();
+
+  const filteredParts = query
+    ? parts.filter((part) => {
+        const name = String(part.partName ?? "").toLowerCase();
+        const number = String(part.partNumber ?? "").toLowerCase();
+        return name.includes(query) || number.includes(query);
+      })
+    : parts;
+
   const showParts = () => {
-    return parts.map((part) => (
+    return filteredParts.map((part) => (
       <PartsCard
         key={part.id}
         header={part.partName}
@@ -75,21 +85,69 @@ export default function cars({ children }) {
   };
 
   return (
-    <div style={styles.root}>
-      <h1>Parts Page</h1>
+    <div style={layout.page}>
+      <div style={layout.header}>
+        <div>
+          <h1 style={text.pageTitle}>Dalys</h1>
+          <p style={styles.subtitle}>
+            {query
+              ? `Rasta ${filteredParts.length} iš ${parts.length}`
+              : `${parts.length} ${parts.length === 1 ? "dalis" : "dalys"} sandėlyje`}
+          </p>
+        </div>
+        <Dropdown />
+      </div>
 
-      <div style={styles.content}>
-        {!showPartForm && (
-          <>
-            <Dropdown />
+      {!showPartForm && (
+        <>
+          <div style={styles.toolbar}>
             <CustomButton
-              ButtonText="Add Part"
+              ButtonText="Pridėti dalį"
               onClick={() => setShowPartForm(true)}
             />
-          </>
-        )}
 
-        {showPartForm && (
+            {parts.length > 0 && (
+              <div style={styles.searchWrapper}>
+                <input
+                  className="app-input"
+                  style={styles.searchInput}
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Ieškoti pagal pavadinimą arba kodą"
+                  aria-label="Ieškoti dalių"
+                />
+                {search && (
+                  <button
+                    type="button"
+                    className="app-icon-btn"
+                    style={styles.clearButton}
+                    onClick={() => setSearch("")}
+                    aria-label="Išvalyti paiešką"
+                  >
+                    &times;
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div style={layout.list}>
+            {parts.length === 0 ? (
+              <p style={layout.emptyState}>Dalių dar nėra</p>
+            ) : filteredParts.length === 0 ? (
+              <p style={layout.emptyState}>
+                Pagal „{search.trim()}“ dalių nerasta
+              </p>
+            ) : (
+              showParts()
+            )}
+          </div>
+        </>
+      )}
+
+      {showPartForm && (
+        <div style={styles.formWrapper}>
           <AddPartForm
             partName={partName}
             setPartName={setPartName}
@@ -101,28 +159,41 @@ export default function cars({ children }) {
             setShowPartForm={setShowPartForm}
             resetValues={resetValues}
           />
-        )}
-        {!showPartForm && showParts()}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
 
 const styles = {
-  root: {
-    display: "flex",
-    flex: 1,
-    flexDirection: "column",
-    // backgroundColor: "#9d4c19",
-    width: "90%",
+  subtitle: {
+    ...text.muted,
+    margin: "4px 0 0",
   },
-
-  content: {
+  formWrapper: {
     display: "flex",
-    flex: 1,
-    flexDirection: "column",
-    // backgroundColor: "green",
-    justifyContent: "flex-start",
+    justifyContent: "center",
+    width: "100%",
+  },
+  toolbar: {
+    display: "flex",
+    flexWrap: "wrap",
     alignItems: "center",
+    gap: space.md,
+    width: "100%",
+  },
+  searchWrapper: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    flex: "1 1 260px",
+    maxWidth: "420px",
+  },
+  searchInput: {
+    paddingRight: "40px",
+  },
+  clearButton: {
+    position: "absolute",
+    right: "4px",
   },
 };

@@ -1,22 +1,35 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { colors, radius, shadow, space } from "../theme";
 
 const PartsCard = ({ id, onClick, header, details, price, onDelete }) => {
   return (
-    <div onClick={onClick} data-id={id} style={styles.root}>
-      <h2 style={styles.header}>{header}</h2>
-      <div style={styles.details}>{details}</div>
+    <div
+      onClick={onClick}
+      data-id={id}
+      className={`app-card${onClick ? " app-card-interactive" : ""}`}
+      style={styles.root}
+    >
+      <div style={styles.info}>
+        <h2 style={styles.header}>{header}</h2>
+        <div className="app-tight-text" style={styles.details}>
+          {details}
+        </div>
+      </div>
+
       <p style={styles.price}>{price}</p>
+
       {onDelete && (
         <button
           type="button"
-          style={styles.deleteButton}
+          className="app-icon-btn"
+          aria-label="Pašalinti"
           onClick={(event) => {
             event.stopPropagation();
             onDelete();
           }}
         >
-          X
+          &times;
         </button>
       )}
     </div>
@@ -25,49 +38,41 @@ const PartsCard = ({ id, onClick, header, details, price, onDelete }) => {
 
 const styles = {
   root: {
-    backgroundColor: "white",
-    borderRadius: "20px",
-    minHeight: "4vh",
-    width: "100%",
-    cursor: "pointer",
-    margin: "0.3vh 0",
-    padding: "1vh 5vh",
-
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: space.lg,
+    width: "100%",
+    padding: `${space.md} ${space.lg}`,
+    backgroundColor: colors.surface,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radius.lg,
+    boxShadow: shadow.sm,
   },
-  header: {
-    fontSize: "1.5rem",
-    margin: 0,
-    padding: 0,
-    flex: 1,
-    textAlign: "left",
-  },
-  details: {
-    fontSize: "1rem",
-    color: "#555",
-    flex: 1,
-    textAlign: "center",
-
+  info: {
     display: "flex",
     flexDirection: "column",
+    gap: "2px",
+    minWidth: 0,
+    flex: 1,
+  },
+  header: {
+    margin: 0,
+    fontSize: "1rem",
+    fontWeight: 600,
+    color: colors.text,
+  },
+  details: {
+    fontSize: "0.85rem",
+    color: colors.textMuted,
   },
   price: {
-    fontSize: "1.5rem",
     margin: 0,
-    padding: 0,
-    flex: 1,
-    textAlign: "right",
-  },
-  deleteButton: {
-    backgroundColor: "transparent",
-    border: "none",
-    color: "#b34c4c",
-    fontSize: "1.2rem",
-    fontWeight: "bold",
-    cursor: "pointer",
-    marginLeft: "2vh",
+    flexShrink: 0,
+    fontSize: "1rem",
+    fontWeight: 600,
+    fontVariantNumeric: "tabular-nums",
+    color: colors.text,
   },
 };
 

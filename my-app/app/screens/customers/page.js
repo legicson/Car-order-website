@@ -3,289 +3,125 @@
 import { supabase } from "./../../supabaseClient"; // Importuojame klientą
 import { useState, useEffect } from "react";
 import CustomButton from "../../components/UI/CustomButton";
-import AddCustomerModal from "../../components/CustomerForm";
 import ModalWrapper from "./../../components/ModalWrapper";
+import Dropdown from "../../components/UI/Dropdown";
 
 import Card from "./../../components/Card";
 import CustomerForm from "./../../components/CustomerForm";
 import CarForm from "./../../components/CarForm";
 import CustomerDetailedForm from "./../../components/CustomerDetailedForm";
+import { layout, space, text } from "../../theme";
+import CustomerCard from "../../components/CustomerCard";
 
-export default function customers({ children }) {
-  const [modal, setModal] = useState(false);
-  const [formState, setFormState] = useState("customer");
-  const [detailedModal, setDetailedModal] = useState(false);
+export default function Customers({ children }) {
   const [customers, setCustomers] = useState([]);
-  const [customerName, setCustomerName] = useState("");
-  const [userId, setUserId] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [car, setCar] = useState("");
-  const [registrationNumber, setRegistrationNumber] = useState("");
-  const [year, setYear] = useState("");
-  const [vin, setVin] = useState("");
-
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    if (!modal && !detailedModal) {
-      resetValues();
-    }
-  }, [modal, detailedModal]);
-
-  const resetValues = () => {
-    setCustomerName("");
-    setCustomerPhone("");
-    setUserId("");
-    setCar("");
-    setRegistrationNumber("");
-    setYear("");
-    setVin("");
-    setFormState("customer");
-  };
-  const addCustomer = async () => {
-    if (!customerName.trim()) return;
-
-    const { error } = await supabase.from("customers").insert([
-      {
-        id: userId,
-        name: customerName,
-        phone_number: customerPhone,
-      },
-    ]);
+    fetchCustomers();
+  }, []);
+  async function fetchCustomers() {
+    const { data: customers, error } = await supabase.from("customers").select(`
+      *,
+      cars (*)
+    `);
 
     if (error) {
-      console.error("Klaida pridedant vartotoją:", error.message);
-    } else {
-      setCustomerName(""); // Išvalome laukelį
-      setCustomerPhone(""); // Išvalome telefono laukelį
+      console.error("Error fetching customers:", error);
+      return;
     }
-  };
 
-  const addCar = async () => {
-    console.log("Inserting for user ID:", userId);
-    if (!car.trim()) return;
+    setCustomers(customers);
+  }
 
-    const { error } = await supabase.from("cars").insert([
-      {
-        car_name: car,
-        registration_no: registrationNumber,
-        year: year,
-        user_id: formState === "additionalCar" ? selectedCustomer.id : userId,
-      },
-    ]);
+  const query = search.trim().toLowerCase();
+  const filteredCustomers = query
+    ? customers.filter((customer) => {
+        const name = String(customer.name ?? "").toLowerCase();
+        const phone = String(customer.phone_number ?? "").toLowerCase();
 
-    if (error) {
-      console.error("Klaida pridedant automobilį:", error.message);
-    } else {
-      setCar(""); // Išvalome laukelį
-      setRegistrationNumber(""); // Išvalome telefono laukelį
-      setVin("");
-      setYear("");
-      setUserId("");
-    }
-  };
-
-  const handleCarAdding = (e) => {
-    e.preventDefault();
-    console.log("Car added:", carName);
-    addCar();
-    setModal(false);
-    setFormState("customer");
-  };
-
-  const handleCustomerAdding = (e) => {
-    e.preventDefault();
-    // console.log("Customer added:", customerName);
-    addCustomer();
-    // setModal(false);
-    setFormState("car");
-  };
-
-  const fetchUsers = async () => {
-    const { data, error } = await supabase.from("customers").select("*");
-
-    if (error) {
-      console.error("Klaida gaunant vartotojus:", error.message);
-    } else {
-      setCustomers(data.sort((a, b) => a.id - b.id));
-    }
-  };
-
-  useEffect(() => {
-    fetchUsers();
-    console.log(customers);
-    setUserId(customers.length + 1);
-  }, [modal, selectedCustomer]);
-
-  const openDetailedView = (customer) => {
-    setSelectedCustomer(customer);
-    setDetailedModal(true);
-  };
-
-  const showCustomerList = () => {
-    return (
-      <>
-        {customers.map((customer) => (
-          <div key={customer.id} className="col-12 col-md-6 col-lg-4">
-            <Card
-              id={customer.id}
-              header={customer.name}
-              addionalDetails={customer.phone_number}
-              onClick={openDetailedView.bind(this, customer)}
-            />
-          </div>
-        ))}
-      </>
-    );
-  };
-
-  const returnForm = () => {
-    if (formState === "customer") {
-      return (
-        <CustomerForm
-          handleCustomerAdding={handleCustomerAdding}
-          setModal={setModal}
-          customerName={customerName}
-          setCustomerName={setCustomerName}
-          customerPhone={customerPhone}
-          setCustomerPhone={setCustomerPhone}
-          car={car}
-          setCar={setCar}
-          registrationNumber={registrationNumber}
-          setRegistrationNumber={setRegistrationNumber}
-          year={year}
-          setYear={setYear}
-          vin={vin}
-          setVin={setVin}
-        />
-      );
-    } else if (formState === "car") {
-      return (
-        <CarForm
-          year={year}
-          setYear={setYear}
-          userId={userId}
-          setUserId={setUserId}
-          handleCarAdding={handleCarAdding}
-          setModal={setModal}
-          carName={car}
-          setCarName={setCar}
-          registrationNumber={registrationNumber}
-          setRegistrationNumber={setRegistrationNumber}
-        />
-      );
-    } else if (formState === "additionalCar") {
-      return (
-        <CarForm
-          year={year}
-          setYear={setYear}
-          userId={selectedCustomer.id}
-          setUserId={setUserId}
-          handleCarAdding={handleCarAdding}
-          setModal={setModal}
-          carName={car}
-          setCarName={setCar}
-          registrationNumber={registrationNumber}
-          setRegistrationNumber={setRegistrationNumber}
-        />
-      );
-    }
-  };
-
-  const addAdditionalCar = () => {
-    setFormState("additionalCar");
-    setDetailedModal(false);
-    setModal(true);
-  };
+        return name.includes(query) || phone.includes(query);
+      })
+    : customers;
 
   return (
-    <div className="container mt-4">
-      <h1 className="mb-4">Klientai</h1>
-
-      <div className="mb-4">
-        <CustomButton
-          ButtonText="Pridėti Klientą"
-          onClick={() => setModal(true)}
-        />
+    <div style={layout.page}>
+      <div style={layout.header}>
+        <h2>Customers</h2>
+        <Dropdown />
+        <div style={styles.toolbar}>
+          <CustomButton ButtonText="Pridėti klientą" onClick={() => {}} />
+          {customers.length > 0 && (
+            <div style={styles.searchWrapper}>
+              <input
+                className="app-input"
+                style={styles.searchInput}
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Ieškoti pagal pavadinimą arba kodą"
+                aria-label="Ieškoti dalių"
+              />
+              {search && (
+                <button
+                  type="button"
+                  className="app-icon-btn"
+                  style={styles.clearButton}
+                  onClick={() => setSearch("")}
+                  aria-label="Išvalyti paiešką"
+                >
+                  &times;
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-
-      <div className="row g-3">
-        {showCustomerList()}
-      </div>
-
-      {modal && (
-        <ModalWrapper isOpen={modal} onClose={() => setModal(false)}>
-          {returnForm()}
-        </ModalWrapper>
-      )}
-      {detailedModal && (
-        <ModalWrapper
-          isOpen={detailedModal}
-          onClose={() => setDetailedModal(false)}
-        >
-          <CustomerDetailedForm
-            setModal={setDetailedModal}
-            selectedCustomer={selectedCustomer}
-            setSelectedCustomer={setSelectedCustomer}
-            addAdditionalCar={addAdditionalCar}
+      <div style={layout.list}>
+        {filteredCustomers.map((customer) => (
+          <CustomerCard
+            key={customer.id}
+            customerName={customer.name}
+            phoneNumber={customer.phone_number}
+            cars={customer.cars}
+            onClick={() => {}}
+            onClickDelete={() => {}}
           />
-        </ModalWrapper>
-      )}
+        ))}
+      </div>
     </div>
   );
 }
 
 const styles = {
-  root: {
-    display: "flex",
-    flex: 1,
-    flexDirection: "column",
-    // backgroundColor: "#9d4c19",
-    width: "90%",
+  subtitle: {
+    ...text.muted,
+    margin: "4px 0 0",
   },
-  pageContent: {
-    // display:"flex",
-    // flexDirection:"row",
-    // flex:1,
-    // margin: 50,
-  },
-
-  modalButtonsContainer: {
+  formWrapper: {
     display: "flex",
+    justifyContent: "center",
     width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
   },
-  modalButton: {
-    borderRadius: "20px",
-    width: "30%",
-    height: "50px",
-    margin: "10px",
-  },
-  modalInput: {
-    width: "80%",
-    height: "40px",
-    borderRadius: "10px",
-    textAlign: "center",
-    fontSize: "25px",
-  },
-  formContent: {
-    // margin: "7%",
+  toolbar: {
     display: "flex",
-    flexDirection: "column",
-    // justifyContent: "center",
-    // alignItems: "center",
-    height: "100%",
-
-    // backgroundColor: "red",
-  },
-  formInput: {
-    display: "flex",
-    flex: 1,
-    flexDirection: "column",
-    justifyContent: "center",
+    flexWrap: "wrap",
     alignItems: "center",
-    // height: "100%",
-    // width: "100%",
+    gap: space.md,
+    width: "100%",
+  },
+  searchWrapper: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    flex: "1 1 260px",
+    maxWidth: "420px",
+  },
+  searchInput: {
+    paddingRight: "40px",
+  },
+  clearButton: {
+    position: "absolute",
+    right: "4px",
   },
 };

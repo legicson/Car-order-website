@@ -1,5 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { colors, radius, shadow, space } from "../theme";
+
+const Detail = ({ label, value }) => (
+  <div style={styles.detail}>
+    <span style={styles.detailLabel}>{label}</span>
+    <span style={styles.detailValue}>{value || "-"}</span>
+  </div>
+);
 
 const CarCard = ({
   id,
@@ -12,91 +20,97 @@ const CarCard = ({
   onClickDelete,
 }) => {
   return (
-    <div onClick={onClick} data-id={id} style={styles.root}>
-      <div style={styles.leftSection}>
-        <h2 style={styles.header}>{carName || "Unknown Car"}</h2>
-        <span style={styles.subText}>{customerName || "Unknown Customer"}</span>
+    <div
+      onClick={onClick}
+      data-id={id}
+      className={`app-card${onClick ? " app-card-interactive" : ""}`}
+      style={styles.root}
+    >
+      <div style={styles.identity}>
+        <h2 style={styles.header}>{carName || "Nežinomas automobilis"}</h2>
+        <span style={styles.subText}>
+          {customerName || "Nežinomas klientas"}
+        </span>
       </div>
 
-      <div style={styles.middleSection}>
-        <span style={styles.detailText}>Reg: {registrationNumber || "-"}</span>
-        <span style={styles.detailText}>Year: {year || "-"}</span>
-        <span style={styles.detailText}>VIN: {vin || "-"}</span>
+      <div style={styles.details}>
+        <Detail label="Numeris" value={registrationNumber} />
+        <Detail label="Metai" value={year} />
+        <Detail label="VIN" value={vin} />
       </div>
 
-      <div style={styles.rightSection}>
-        {onClickDelete && (
-          <button
-            type="button"
-            style={styles.deleteButton}
-            onClick={(event) => {
-              event.stopPropagation();
-              onClickDelete();
-            }}
-          >
-            X
-          </button>
-        )}
-      </div>
+      {onClickDelete && (
+        <button
+          type="button"
+          className="app-icon-btn"
+          aria-label="Pašalinti automobilį"
+          onClick={(event) => {
+            event.stopPropagation();
+            onClickDelete();
+          }}
+        >
+          &times;
+        </button>
+      )}
     </div>
   );
 };
 
 const styles = {
   root: {
-    backgroundColor: "white",
-    borderRadius: "20px",
-    minHeight: "4vh",
-    width: "100%",
-    cursor: "pointer",
-    margin: "0.3vh 0",
-    padding: "1vh 5vh",
-
     display: "flex",
+    flexWrap: "wrap",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: "2vh",
+    gap: space.lg,
+    width: "100%",
+    padding: `${space.lg} ${space.xl}`,
+    backgroundColor: colors.surface,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radius.lg,
+    boxShadow: shadow.sm,
   },
-  leftSection: {
-    flex: 2,
+  identity: {
     display: "flex",
     flexDirection: "column",
-    textAlign: "left",
+    gap: "2px",
+    flex: "1 1 180px",
+    minWidth: 0,
   },
   header: {
-    fontSize: "1.3rem",
     margin: 0,
-    padding: 0,
+    fontSize: "1.05rem",
+    fontWeight: 600,
+    color: colors.text,
   },
   subText: {
-    fontSize: "0.9rem",
-    color: "#555",
+    fontSize: "0.85rem",
+    color: colors.textMuted,
   },
-  middleSection: {
-    flex: 2,
+  details: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: space.xl,
+    flex: "2 1 320px",
+  },
+  detail: {
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
     gap: "2px",
+    minWidth: 0,
   },
-  detailText: {
-    fontSize: "0.9rem",
-    color: "#555",
+  detailLabel: {
+    fontSize: "0.7rem",
+    fontWeight: 600,
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+    color: colors.textSubtle,
   },
-  rightSection: {
-    flex: 1,
-    display: "flex",
-    justifyContent: "flex-end",
-    alignItems: "center",
-  },
-  deleteButton: {
-    backgroundColor: "transparent",
-    border: "none",
-    color: "#b34c4c",
-    fontSize: "1.2rem",
-    fontWeight: "bold",
-    cursor: "pointer",
-    marginLeft: "2vh",
+  detailValue: {
+    fontSize: "0.95rem",
+    fontWeight: 500,
+    color: colors.text,
+    overflowWrap: "anywhere",
   },
 };
 
