@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation"; // ✅ Add this line
 import AddCustomerForm from "./components/AddCustomerForm";
 import AddPartForm from "./components/AddPartForm";
 import CarAddForm from "./components/CarAddForm";
+
 export default function Home() {
   const router = useRouter();
   const [customers, setCustomers] = useState([]);
@@ -155,7 +156,7 @@ export default function Home() {
 
   const addPart = async () => {
     if (!partName.trim()) return;
-    const normalizedPrice = toFloat(partPrice);
+    const normalizedPrice = parseFloat(String(partPrice).replace(",", "."));
     const { error } = await supabase.from("parts").insert([
       {
         partName: partName,
@@ -300,12 +301,15 @@ export default function Home() {
     <div style={style.root}>
       <div>
         {!showOrderForm && !showCustomerForm && !showCarForm && (
-          <AddButtonsRow
-            setAddCustomerModalOpen={setShowCustomerForm}
-            setAddOrderModalOpen={setShowOrderForm}
-            setAddCarModalOpen={setShowCarForm}
-            setAddPartModalOpen={setShowPartForm}
-          />
+          <>
+            <AddButtonsRow
+              setAddCustomerModalOpen={setShowCustomerForm}
+              setAddOrderModalOpen={setShowOrderForm}
+              setAddCarModalOpen={setShowCarForm}
+              setAddPartModalOpen={setShowPartForm}
+            />
+            <Dropdown />
+          </>
         )}
       </div>
 

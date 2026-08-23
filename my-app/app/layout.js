@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
         <Header />
-        <Dropdown />
+        {/* <Dropdown /> */}
         {children}
         {/* <Footer /> */}
       </body>
