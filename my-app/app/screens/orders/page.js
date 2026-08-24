@@ -4,10 +4,21 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient"; // Importuojame klientą
 import OrderCard from "../../components/OrderCard";
 import Dropdown from "../../components/UI/Dropdown";
-import { layout, text } from "../../theme";
+import { layout, text, colors, radius } from "../../theme";
+
+const STATUS_COLORS = {
+  Active: { color: colors.warning, backgroundColor: colors.warningSoft },
+  // Active: { color: colors.warning, backgroundColor: colors.warningSoft },
+  Finished: { color: colors.success, backgroundColor: colors.successSoft },
+  "Waiting for parts": {
+    color: colors.danger,
+    backgroundColor: colors.dangerSoft,
+  },
+};
 
 export default function orders({ children }) {
   const [orders, setOrders] = useState([]);
+  const [filterStatus, setFilterStatus] = useState(null);
 
   async function fetchOrders() {
     const { data, error } = await supabase.from("orders").select(`
@@ -27,8 +38,16 @@ export default function orders({ children }) {
       return null;
     }
 
-    setOrders(data);
+    setOrders(
+      data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
+    );
   }
+
+  const getStatusStyle = (status) =>
+    STATUS_COLORS[status] ?? {
+      color: colors.accent,
+      backgroundColor: colors.accentSoft,
+    };
 
   useEffect(() => {
     fetchOrders();
@@ -51,6 +70,22 @@ export default function orders({ children }) {
           <p style={styles.subtitle}>
             {orders.length} {orders.length === 1 ? "užsakymas" : "užsakymai"}
           </p>
+          <span style={{ ...styles.statusBadge, ...getStatusStyle("Active") }}>
+            {"Vykdomas"}
+          </span>
+          <span
+            style={{
+              ...styles.statusBadge,
+              ...getStatusStyle("Waiting for parts"),
+            }}
+          >
+            {"Laukia dalių"}
+          </span>
+          <span
+            style={{ ...styles.statusBadge, ...getStatusStyle("Finished") }}
+          >
+            {"Baigtas"}
+          </span>
         </div>
         <Dropdown />
       </div>
@@ -83,5 +118,12 @@ const styles = {
   subtitle: {
     ...text.muted,
     margin: "4px 0 0",
+  },
+  statusBadge: {
+    padding: "5px 12px",
+    borderRadius: radius.pill,
+    fontSize: "0.8rem",
+    fontWeight: 600,
+    whiteSpace: "nowrap",
   },
 };

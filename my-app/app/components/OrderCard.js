@@ -3,10 +3,13 @@ import PropTypes from "prop-types";
 import { colors, radius, shadow, space } from "../theme";
 
 const STATUS_COLORS = {
-  Vykdomas: { color: colors.warning, backgroundColor: colors.warningSoft },
   Active: { color: colors.warning, backgroundColor: colors.warningSoft },
-  Baigtas: { color: colors.success, backgroundColor: colors.successSoft },
-  "Laukia dalių": { color: colors.danger, backgroundColor: colors.dangerSoft },
+  // Active: { color: colors.warning, backgroundColor: colors.warningSoft },
+  Finished: { color: colors.success, backgroundColor: colors.successSoft },
+  "Waiting for parts": {
+    color: colors.danger,
+    backgroundColor: colors.dangerSoft,
+  },
 };
 
 const getStatusStyle = (status) =>
@@ -39,6 +42,19 @@ const OrderCard = ({
   onClick,
   onDelete,
 }) => {
+  const returnStatusText = (status) => {
+    switch (status) {
+      case "Active":
+        return "Vykdomas";
+      case "Finished":
+        return "Baigtas";
+      case "Waiting for parts":
+        return "Laukia dalių";
+      default:
+        return "Nenurodyta";
+    }
+  };
+
   return (
     <div
       onClick={onClick}
@@ -70,7 +86,7 @@ const OrderCard = ({
 
       <div style={styles.actions}>
         <span style={{ ...styles.statusBadge, ...getStatusStyle(status) }}>
-          {status || "Nenurodyta"}
+          {returnStatusText(status)}
         </span>
         {onDelete && (
           <button
