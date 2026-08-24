@@ -55,7 +55,7 @@ export default function cars({ children }) {
     if (error) {
       console.error("Klaida gaunant dalis:", error.message);
     } else {
-      setParts(data);
+      setParts(data.sort((a, b) => new Date(b.id) - new Date(a.id)));
     }
   };
 

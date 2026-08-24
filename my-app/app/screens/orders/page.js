@@ -5,6 +5,8 @@ import { supabase } from "../../supabaseClient"; // Importuojame klientą
 import OrderCard from "../../components/OrderCard";
 import Dropdown from "../../components/UI/Dropdown";
 import { layout, text, colors, radius } from "../../theme";
+import CustomButton from "../../components/UI/CustomButton";
+
 
 const STATUS_COLORS = {
   Active: { color: colors.warning, backgroundColor: colors.warningSoft },
@@ -90,14 +92,15 @@ export default function orders({ children }) {
 
           <div style={styles.searchContainer}>
             <div style={styles.searchWrapper}>
+              <CustomButton ButtonText="Pridėti klientą" onClick={() => {}} />
               <input
                 className="app-input"
                 style={styles.searchInput}
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Ieškoti pagal pavadinimą arba kodą"
-                aria-label="Ieškoti dalių"
+                placeholder="Ieškoti pagal vardą arba automobilį"
+                aria-label="Ieškoti užsakymų"
               />
               {search && (
                 <button
@@ -159,7 +162,7 @@ export default function orders({ children }) {
         <Dropdown />
       </div>
 
-      <div style={layout.list}>
+      <div style={layout.content}>
         {filteredOrders.length === 0 ? (
           <p style={layout.emptyState}>Užsakymų dar nėra</p>
         ) : (
@@ -219,12 +222,16 @@ const styles = {
     display: "flex",
     alignItems: "center",
     flex: "1 1 260px",
-    maxWidth: "420px",
+    maxWidth: "450px",
   },
   searchContainer: {
     display: "flex",
     justifyContent: "space-between",
     // alignItems: "center",
     width: "100%",
+  },
+  searchInput: {
+    // paddingRight: "40px",
+    marginLeft: "10px",
   },
 };

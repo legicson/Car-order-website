@@ -158,11 +158,11 @@ export default function orderList({ params }) {
       <div style={styles.partAddingSection}>
         <div style={styles.column}>
           <h2 style={text.sectionTitle}>Galimos dalys</h2>
-          <div style={layout.list}>{returnAvailableParts()}</div>
+          <div style={layout.content}>{returnAvailableParts()}</div>
         </div>
         <div style={styles.column}>
           <h2 style={text.sectionTitle}>Pasirinktos dalys</h2>
-          <div style={layout.list}>
+          <div style={layout.content}>
             {addedParts.length === 0 ? (
               <p style={layout.emptyState}>Dar nieko nepasirinkta</p>
             ) : (
@@ -279,7 +279,7 @@ export default function orderList({ params }) {
         {showAddedParts && (
           <div style={styles.column}>
             <h2 style={text.sectionTitle}>Užsakymo dalys</h2>
-            <div style={layout.list}>
+            <div style={layout.content}>
               {orderItems.length === 0 ? (
                 <p style={layout.emptyState}>Dalių dar nepridėta</p>
               ) : (

@@ -68,7 +68,7 @@ export default function cars({ children }) {
         </div>
       )}
 
-      <div style={layout.list}>
+      <div style={layout.content}>
         {cars.length === 0 ? (
           <p style={layout.emptyState}>Automobilių dar nėra</p>
         ) : filteredCars.length === 0 ? (

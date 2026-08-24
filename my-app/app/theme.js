@@ -94,7 +94,7 @@ export const layout = {
     alignItems: "center",
     justifyContent: "space-between",
   },
-  list: {
+  content: {
     display: "flex",
     flexDirection: "column",
     gap: space.sm,
