@@ -40,6 +40,23 @@ export const formStyles = {
     gap: space.xs,
   },
   label: text.label,
+  // Shown next to the label for fields that are safe to leave blank.
+  labelHint: {
+    ...text.label,
+    color: colors.textSubtle,
+    textTransform: "none",
+    letterSpacing: "normal",
+    fontWeight: 500,
+  },
+  // Validation message under a field, plus the border override for the input
+  // it belongs to.
+  error: {
+    fontSize: "0.8rem",
+    color: colors.danger,
+  },
+  inputError: {
+    borderColor: colors.danger,
+  },
   buttonRow: {
     display: "flex",
     flexWrap: "wrap",
