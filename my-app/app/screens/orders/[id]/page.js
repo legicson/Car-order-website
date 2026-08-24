@@ -17,6 +17,7 @@ export default function orderList({ params }) {
   const [totalPrice, setTotalPrice] = useState(0);
 
   const [addedParts, setAddedParts] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState(null);
 
   useEffect(() => {
     fetchOrderDetails();
@@ -240,6 +241,9 @@ export default function orderList({ params }) {
       />
     ));
   };
+
+
+  
 
   return (
     <div style={layout.page}>
