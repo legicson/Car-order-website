@@ -194,19 +194,6 @@ export default function Home() {
             ? "Pasirinkite klientą naujam užsakymui"
             : "Pasirinkite klientą, kuriam norite pridėti automobilį"}
         </h2>
-
-        <div style={layout.list}>
-          {customers.map((customer) => (
-            <Card
-              key={customer.id}
-              id={customer.id}
-              header={customer.name}
-              addionalDetails={customer.phone_number}
-              onClick={() => onClickSetSelectedCustomer(customer)}
-            />
-          ))}
-        </div>
-
         <div style={style.pickerActions}>
           <button
             type="button"
@@ -218,6 +205,17 @@ export default function Home() {
           >
             Atšaukti
           </button>
+        </div>
+        <div style={layout.list}>
+          {customers.map((customer) => (
+            <Card
+              key={customer.id}
+              id={customer.id}
+              header={customer.name}
+              addionalDetails={customer.phone_number}
+              onClick={() => onClickSetSelectedCustomer(customer)}
+            />
+          ))}
         </div>
       </div>
     );
@@ -391,7 +389,7 @@ const style = {
     flexDirection: "column",
     gap: "16px",
     width: "100%",
-    maxWidth: "620px",
+    maxWidth: "80%",
   },
   pickerTitle: {
     ...text.pageTitle,

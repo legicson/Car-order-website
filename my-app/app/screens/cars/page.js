@@ -6,11 +6,39 @@ import CarCard from "./../../components/CarCard";
 import Dropdown from "../../components/UI/Dropdown";
 import SearchInput from "../../components/UI/SearchInput";
 import { layout, space, text } from "../../theme";
+import CarAddForm from "../../components/CarAddForm";
+import CustomButton from "../../components/UI/CustomButton";
+import Card from "../../components/Card";
 
 export default function cars({ children }) {
   const [cars, setCars] = useState([]);
   const [search, setSearch] = useState("");
+  const [showCarForm, setShowCarForm] = useState(false);
+  const [step, setStep] = useState(1);
+  const [carName, setCarName] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [year, setYear] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [customers, setCustomers] = useState([]);
 
+  const resetValues = () => {
+    setCarName("");
+    setRegistrationNumber("");
+    setYear("");
+    setSelectedCustomer(null);
+    setStep(1);
+    setShowCarForm(false);
+  };
+
+  const fetchCustomers = async () => {
+    const { data, error } = await supabase.from("customers").select("*");
+
+    if (error) {
+      console.error("Klaida gaunant vartotojus:", error.message);
+    } else {
+      setCustomers(data);
+    }
+  };
   const fetchCars = async () => {
     const { data: cars, error } = await supabase.from("cars").select(`
       *,
@@ -25,12 +53,60 @@ export default function cars({ children }) {
     setCars(cars);
   };
 
+  const returnSelectableCustomerList = () => {
+    return (
+      <div style={style.picker}>
+        <h2 style={style.pickerTitle}>
+          "Pasirinkite klientą, kuriam norite pridėti automobilį"
+        </h2>
+        <div style={style.pickerActions}>
+          <button
+            type="button"
+            className="app-btn app-btn-secondary"
+            onClick={() => {
+              setShowCarForm(false);
+              resetValues();
+            }}
+          >
+            Atšaukti
+          </button>
+        </div>
+        <div style={layout.list}>
+          {customers.map((customer) => (
+            <Card
+              key={customer.id}
+              id={customer.id}
+              header={customer.name}
+              addionalDetails={customer.phone_number}
+              onClick={() => onClickSetSelectedCustomer(customer)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
   useEffect(() => {
     fetchCars();
+    fetchCustomers();
   }, []);
 
   const query = search.trim().toLowerCase();
+  const addCar = async (newCustomerId) => {
+    if (!carName.trim()) return;
 
+    const { error } = await supabase.from("cars").insert([
+      {
+        car_name: carName,
+        registration_no: registrationNumber,
+        year: year,
+        user_id: newCustomerId,
+      },
+    ]);
+
+    if (error) {
+      console.error("Klaida pridedant automobilį:", error.message);
+    }
+  };
   const filteredCars = query
     ? cars.filter((car) =>
         [
@@ -39,10 +115,47 @@ export default function cars({ children }) {
           car.vin,
           car.year,
           car.customers?.name,
-        ].some((field) => String(field ?? "").toLowerCase().includes(query)),
+        ].some((field) =>
+          String(field ?? "")
+            .toLowerCase()
+            .includes(query),
+        ),
       )
     : cars;
 
+  const onClickSetSelectedCustomer = (item) => {
+    setSelectedCustomer(item);
+    nextStep();
+  };
+
+  const onClickSetSelectedCar = async (item) => {
+    const orderId = await addOrder(item);
+    setShowOrderForm(false);
+    resetValues();
+    router.push(`/screens/orders/${orderId}`);
+  };
+
+  const nextStep = () => setStep((prev) => prev + 1);
+  const prevStep = () => setStep((prev) => prev - 1);
+  const handleAddingCarCustomer = async (e) => {
+    e.preventDefault();
+
+    let newCustomerId;
+    if (showCarForm) {
+      newCustomerId = selectedCustomer.id;
+    } else {
+      newCustomerId = await addCustomer();
+    }
+
+    if (newCustomerId) {
+      await addCar(newCustomerId);
+      fetchCustomers();
+      fetchCars();
+      resetValues();
+    } else {
+      console.log("Nepavyko prideti kliento");
+    }
+  };
   return (
     <div style={layout.page}>
       <div style={layout.header}>
@@ -59,6 +172,10 @@ export default function cars({ children }) {
 
       {cars.length > 0 && (
         <div style={styles.toolbar}>
+          <CustomButton
+            ButtonText="Pridėti automobilį"
+            onClick={() => setShowCarForm(true)}
+          />
           <SearchInput
             value={search}
             onChange={setSearch}
@@ -68,28 +185,44 @@ export default function cars({ children }) {
         </div>
       )}
 
-      <div style={layout.content}>
-        {cars.length === 0 ? (
-          <p style={layout.emptyState}>Automobilių dar nėra</p>
-        ) : filteredCars.length === 0 ? (
-          <p style={layout.emptyState}>
-            Pagal „{search.trim()}“ automobilių nerasta
-          </p>
-        ) : (
-          filteredCars.map((car) => (
-            <CarCard
-              key={car.id}
-              id={car.id}
-              carName={car.car_name}
-              customerName={car.customers?.name}
-              registrationNumber={car.registration_no}
-              year={car.year}
-              vin={car.vin}
-              onClick={() => {}}
-              onClickDelete={() => {}}
-            />
-          ))
-        )}
+      <div style={{ ...layout.content, ...style.content }}>
+        {!showCarForm &&
+          (cars.length === 0 ? (
+            <p style={layout.emptyState}>Automobilių dar nėra</p>
+          ) : filteredCars.length === 0 ? (
+            <p style={layout.emptyState}>
+              Pagal „{search.trim()}“ automobilių nerasta
+            </p>
+          ) : (
+            filteredCars.map((car) => (
+              <CarCard
+                key={car.id}
+                id={car.id}
+                carName={car.car_name}
+                customerName={car.customers?.name}
+                registrationNumber={car.registration_no}
+                year={car.year}
+                vin={car.vin}
+                onClick={() => {}}
+                onClickDelete={() => {}}
+              />
+            ))
+          ))}
+
+        {showCarForm &&
+          ((step === 1 && returnSelectableCustomerList()) ||
+            (step === 2 && (
+              <CarAddForm
+                carName={carName}
+                setCarName={setCarName}
+                registrationNumber={registrationNumber}
+                setRegistrationNumber={setRegistrationNumber}
+                year={year}
+                setYear={setYear}
+                handleAddingCarCustomer={handleAddingCarCustomer}
+                prevStep={prevStep}
+              />
+            )))}
       </div>
     </div>
   );
@@ -106,5 +239,33 @@ const styles = {
     alignItems: "center",
     gap: space.md,
     width: "100%",
+  },
+};
+
+const style = {
+  subtitle: {
+    ...text.muted,
+    margin: "4px 0 0",
+  },
+  content: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    width: "100%",
+  },
+  picker: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+    width: "100%",
+    maxWidth: "80%",
+  },
+  pickerTitle: {
+    ...text.pageTitle,
+    fontSize: "1.35rem",
+  },
+  pickerActions: {
+    display: "flex",
+    gap: "8px",
   },
 };

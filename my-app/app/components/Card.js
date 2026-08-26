@@ -29,6 +29,7 @@ const styles = {
     border: `1px solid ${colors.border}`,
     borderRadius: radius.lg,
     boxShadow: shadow.sm,
+    marginTop: space.sm,
   },
   cardHeader: {
     margin: 0,
