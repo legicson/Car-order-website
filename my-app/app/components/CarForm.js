@@ -9,6 +9,8 @@ function CarForm({
   setCarName,
   registrationNumber,
   setRegistrationNumber,
+  commnent,
+  setCommnent,
 }) {
   return (
     <form style={formStyles.modal} onSubmit={handleCarAdding}>

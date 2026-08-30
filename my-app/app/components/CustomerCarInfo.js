@@ -9,12 +9,13 @@ const Field = ({ label, value }) => (
   </div>
 );
 
-const CustomerCarInfo = ({ customer, car }) => {
+const CustomerCarInfo = ({ customer, car, mileage }) => {
   return (
     <div style={styles.root}>
       <Field label="Klientas" value={customer?.name} />
       <Field label="Telefonas" value={customer?.phone_number} />
       <Field label="Automobilis" value={car?.car_name} />
+      <Field label="Rida" value={mileage} />
     </div>
   );
 };
@@ -52,6 +53,7 @@ CustomerCarInfo.propTypes = {
   car: PropTypes.shape({
     car_name: PropTypes.string,
   }),
+  mileage: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 export default CustomerCarInfo;

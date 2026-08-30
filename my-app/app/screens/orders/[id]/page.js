@@ -8,6 +8,7 @@ import { colors, layout, radius, shadow, space, text } from "../../../theme";
 export default function orderList({ params }) {
   const [showPartAddingSection, setShowPartAddingSection] = useState(false);
   const [showAddedParts, setShowAddedParts] = useState(true);
+  const [showMileageSection, setShowMileageSection] = useState(false);
 
   const { id } = use(params);
   const [car, setCar] = useState(null);
@@ -15,6 +16,7 @@ export default function orderList({ params }) {
   const [parts, setParts] = useState([]);
   const [orderItems, setOrderItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [mileage, setMileage] = useState("");
 
   const [addedParts, setAddedParts] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState(null);
@@ -79,7 +81,12 @@ export default function orderList({ params }) {
     setOrderItems(orderItems.filter((item) => item.id !== orderItemId));
   };
 
+
   const addOrderItems = async () => {
+    if (mileage === "") {
+      alert("Prašome įvesti ridą");
+      return;
+    }
     setShowPartAddingSection(false);
     setShowAddedParts(true);
     addedParts.forEach(async (part) => {
@@ -111,6 +118,7 @@ export default function orderList({ params }) {
     total_price,
     income,
     status,
+    mileage,
     car:cars (
       id,
       car_name,
@@ -133,7 +141,58 @@ export default function orderList({ params }) {
     } else {
       setCar(data.car);
       setCustomer(data.car.customer);
+      setMileage(data.mileage ?? "");
     }
+  };
+
+  const saveMileage = async (e) => {
+    e.preventDefault();
+
+    const { error } = await supabase
+      .from("orders")
+      .update({ mileage: mileage === "" ? null : Number(mileage) })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Klaida išsaugant ridą:", error.message);
+      return;
+    }
+
+    setShowMileageSection(false);
+  };
+
+  const returnMileageSection = () => {
+    return (
+      <form style={styles.mileageForm} onSubmit={saveMileage}>
+        <div style={styles.mileageField}>
+          <label style={text.label} htmlFor="order-mileage">
+            Rida (km)
+          </label>
+          <input
+            id="order-mileage"
+            className="app-input"
+            type="number"
+            min="0"
+            inputMode="numeric"
+            value={mileage}
+            onChange={(e) => setMileage(e.target.value)}
+            placeholder="206000"
+          />
+        </div>
+        <div style={styles.dashboardActions}>
+          <button type="submit" className="app-btn app-btn-primary">
+            Išsaugoti ridą
+          </button>
+          <button
+            type="button"
+            className="app-btn app-btn-secondary"
+            onClick={() => setShowMileageSection(false)}
+          >
+            Atšaukti
+          </button>
+        </div>
+      </form>
+    );
   };
 
   const returnAddedParts = () => {
@@ -242,15 +301,18 @@ export default function orderList({ params }) {
     ));
   };
 
-
-  
-
   return (
     <div style={layout.page}>
       <div style={styles.dashboard}>
         <div style={styles.dashboardTop}>
           <h1 style={text.pageTitle}>Užsakymas #{id}</h1>
           <div style={styles.dashboardActions}>
+            <button
+              className="app-btn app-btn-secondary"
+              onClick={() => setShowMileageSection(!showMileageSection)}
+            >
+              Įvesti ridą
+            </button>
             <button
               className="app-btn app-btn-secondary"
               onClick={() => {
@@ -266,7 +328,9 @@ export default function orderList({ params }) {
           </div>
         </div>
 
-        <CustomerCarInfo customer={customer} car={car} />
+        <CustomerCarInfo customer={customer} car={car} mileage={mileage} />
+
+        {showMileageSection && returnMileageSection()}
 
         <div style={styles.totalRow}>
           <span style={styles.totalLabel}>Bendra suma</span>
@@ -315,6 +379,21 @@ const styles = {
     display: "flex",
     flexWrap: "wrap",
     gap: space.sm,
+  },
+  mileageForm: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "flex-end",
+    gap: space.md,
+    paddingTop: space.lg,
+    borderTop: `1px solid ${colors.border}`,
+  },
+  mileageField: {
+    display: "flex",
+    flexDirection: "column",
+    gap: space.xs,
+    flex: "1 1 200px",
+    maxWidth: "240px",
   },
   totalRow: {
     display: "flex",

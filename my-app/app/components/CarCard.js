@@ -16,6 +16,7 @@ const CarCard = ({
   registrationNumber,
   year,
   vin,
+  comment,
   onClick,
   onClickDelete,
 }) => {
@@ -38,6 +39,13 @@ const CarCard = ({
         <Detail label="Metai" value={year} />
         <Detail label="VIN" value={vin} />
       </div>
+
+      {comment && (
+        <div style={styles.comment}>
+          <span style={styles.detailLabel}>Komentaras</span>
+          <span style={styles.commentValue}>{comment}</span>
+        </div>
+      )}
 
       {onClickDelete && (
         <button
@@ -112,6 +120,18 @@ const styles = {
     color: colors.text,
     overflowWrap: "anywhere",
   },
+  comment: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px",
+    flex: "1 1 100%",
+    minWidth: 0,
+  },
+  commentValue: {
+    fontSize: "0.9rem",
+    color: colors.textMuted,
+    overflowWrap: "anywhere",
+  },
 };
 
 CarCard.propTypes = {
@@ -121,6 +141,7 @@ CarCard.propTypes = {
   registrationNumber: PropTypes.string,
   year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   vin: PropTypes.string,
+  comment: PropTypes.string,
   onClick: PropTypes.func,
   onClickDelete: PropTypes.func,
 };

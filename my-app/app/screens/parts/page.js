@@ -80,6 +80,7 @@ export default function cars({ children }) {
         header={part.partName}
         details={part.partNumber}
         price={part.price}
+        onDelete={() => {}}
       />
     ));
   };

@@ -18,6 +18,7 @@ export default function cars({ children }) {
   const [carName, setCarName] = useState("");
   const [registrationNumber, setRegistrationNumber] = useState("");
   const [year, setYear] = useState("");
+  const [commnent, setCommnent] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customers, setCustomers] = useState([]);
 
@@ -25,6 +26,7 @@ export default function cars({ children }) {
     setCarName("");
     setRegistrationNumber("");
     setYear("");
+    setCommnent("");
     setSelectedCustomer(null);
     setStep(1);
     setShowCarForm(false);
@@ -99,6 +101,7 @@ export default function cars({ children }) {
         car_name: carName,
         registration_no: registrationNumber,
         year: year,
+        comment: commnent,
         user_id: newCustomerId,
       },
     ]);
@@ -203,6 +206,7 @@ export default function cars({ children }) {
                 registrationNumber={car.registration_no}
                 year={car.year}
                 vin={car.vin}
+                comment={car.comment}
                 onClick={() => {}}
                 onClickDelete={() => {}}
               />
@@ -219,6 +223,8 @@ export default function cars({ children }) {
                 setRegistrationNumber={setRegistrationNumber}
                 year={year}
                 setYear={setYear}
+                commnent={commnent}
+                setCommnent={setCommnent}
                 handleAddingCarCustomer={handleAddingCarCustomer}
                 prevStep={prevStep}
               />

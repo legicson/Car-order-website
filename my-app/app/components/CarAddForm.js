@@ -4,6 +4,7 @@ import { useState } from "react";
 import formStyles from "./UI/formStyles";
 
 const EARLIEST_YEAR = 1900;
+const COMMENT_MAX_LENGTH = 250;
 
 export default function CarAddForm({
   carName,
@@ -14,6 +15,8 @@ export default function CarAddForm({
   setYear,
   handleAddingCarCustomer,
   prevStep,
+  commnent,
+  setCommnent,
 }) {
   const [errors, setErrors] = useState({});
 
@@ -127,6 +130,25 @@ export default function CarAddForm({
               {errors.year}
             </span>
           )}
+        </div>
+
+        <div style={formStyles.field}>
+          <label style={formStyles.label} htmlFor="car-comment">
+            Komentaras{" "}
+            <span style={formStyles.labelHint}>(neprivaloma)</span>
+          </label>
+          <textarea
+            id="car-comment"
+            className="app-input"
+            value={commnent}
+            onChange={(e) => setCommnent(e.target.value)}
+            placeholder="Papildoma informacija"
+            maxLength={COMMENT_MAX_LENGTH}
+            rows={4}
+          />
+          <span style={formStyles.labelHint}>
+            {commnent.length}/{COMMENT_MAX_LENGTH}
+          </span>
         </div>
       </div>
 

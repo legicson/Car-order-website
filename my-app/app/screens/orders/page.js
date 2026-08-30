@@ -23,6 +23,7 @@ export default function orders({ children }) {
   const [orders, setOrders] = useState([]);
   const [status, setStatus] = useState("Active");
   const [search, setSearch] = useState("");
+  const [mileage, setMileage] = useState("");
 
   async function fetchOrders() {
     const { data, error } = await supabase.from("orders").select(`
@@ -178,6 +179,7 @@ export default function orders({ children }) {
               onClick={() => {}}
               onDelete={() => {}}
               totalPrice={calculateOrderTotalPrice(order)}
+              mileage={order.mileage}
             />
           ))
         )}
