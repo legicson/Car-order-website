@@ -6,7 +6,7 @@ import OrderCard from "../../components/OrderCard";
 import Dropdown from "../../components/UI/Dropdown";
 import { layout, text, colors, radius } from "../../theme";
 import CustomButton from "../../components/UI/CustomButton";
-
+import { useRouter } from "next/navigation";
 
 const STATUS_COLORS = {
   Active: { color: colors.warning, backgroundColor: colors.warningSoft },
@@ -20,8 +20,9 @@ const STATUS_COLORS = {
 };
 
 export default function orders({ children }) {
+  const router = useRouter();
   const [orders, setOrders] = useState([]);
-  const [status, setStatus] = useState("Active");
+  const [status, setStatus] = useState("All");
   const [search, setSearch] = useState("");
   const [mileage, setMileage] = useState("");
 
@@ -81,6 +82,10 @@ export default function orders({ children }) {
         return name.includes(query) || car.includes(query);
       })
     : filteredOrdersByStatus;
+
+  const onClickSetSelectedCar = async (orderId) => {
+    router.push(`/screens/orders/${orderId}`);
+  };
 
   return (
     <div style={layout.page}>
@@ -176,7 +181,7 @@ export default function orders({ children }) {
               createdAt={order.created_at}
               income={order.income}
               status={order.status}
-              onClick={() => {}}
+              onClick={() => onClickSetSelectedCar(order.id)}
               onDelete={() => {}}
               totalPrice={calculateOrderTotalPrice(order)}
               mileage={order.mileage}

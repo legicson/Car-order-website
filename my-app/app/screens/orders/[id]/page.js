@@ -4,8 +4,12 @@ import { use, useState, useEffect } from "react";
 import CustomerCarInfo from "../../../components/CustomerCarInfo";
 import PartsCard from "../../../components/PartsCard";
 import { colors, layout, radius, shadow, space, text } from "../../../theme";
+import Dropdown from "../../../components/UI/Dropdown";
+import { useRouter } from "next/navigation";
+import StatusDropdown from "../../../components/StatusDropdown";
 
 export default function orderList({ params }) {
+  const router = useRouter();
   const [showPartAddingSection, setShowPartAddingSection] = useState(false);
   const [showAddedParts, setShowAddedParts] = useState(true);
   const [showMileageSection, setShowMileageSection] = useState(false);
@@ -17,6 +21,7 @@ export default function orderList({ params }) {
   const [orderItems, setOrderItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [mileage, setMileage] = useState("");
+  const [status, setStatus] = useState(null);
 
   const [addedParts, setAddedParts] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState(null);
@@ -81,12 +86,7 @@ export default function orderList({ params }) {
     setOrderItems(orderItems.filter((item) => item.id !== orderItemId));
   };
 
-
   const addOrderItems = async () => {
-    if (mileage === "") {
-      alert("Prašome įvesti ridą");
-      return;
-    }
     setShowPartAddingSection(false);
     setShowAddedParts(true);
     addedParts.forEach(async (part) => {
@@ -142,6 +142,7 @@ export default function orderList({ params }) {
       setCar(data.car);
       setCustomer(data.car.customer);
       setMileage(data.mileage ?? "");
+      setStatus(data.status);
     }
   };
 
@@ -159,6 +160,20 @@ export default function orderList({ params }) {
     }
 
     setShowMileageSection(false);
+  };
+
+  const saveStatus = async (newStatus) => {
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: newStatus })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Klaida išsaugant statusą:", error.message);
+      return;
+    }
+
+    setStatus(newStatus);
   };
 
   const returnMileageSection = () => {
@@ -301,6 +316,15 @@ export default function orderList({ params }) {
     ));
   };
 
+  const returnToOrders = () => {
+    if (mileage === "") {
+      alert("Prašome įvesti ridą");
+      return;
+    }
+    saveStatus(status);
+    router.push("/screens/orders");
+  };
+
   return (
     <div style={layout.page}>
       <div style={styles.dashboard}>
@@ -313,17 +337,14 @@ export default function orderList({ params }) {
             >
               Įvesti ridą
             </button>
+
+            <StatusDropdown status={status} setStatus={setStatus} />
+
             <button
-              className="app-btn app-btn-secondary"
-              onClick={() => {
-                setShowPartAddingSection(!showPartAddingSection);
-                setShowAddedParts(!showAddedParts);
-              }}
+              className="app-btn app-btn-primary"
+              onClick={returnToOrders}
             >
-              Pridėti dalis
-            </button>
-            <button className="app-btn app-btn-primary" onClick={addOrderItems}>
-              Išsaugoti
+              Grįžti į užsakymus
             </button>
           </div>
         </div>
@@ -339,10 +360,29 @@ export default function orderList({ params }) {
       </div>
 
       <div style={styles.content}>
+        <div style={styles.partsHeaderContainer}>
+          {showAddedParts && (
+            <button
+              className="app-btn app-btn-secondary"
+              onClick={() => {
+                setShowPartAddingSection(!showPartAddingSection);
+                setShowAddedParts(!showAddedParts);
+              }}
+            >
+              Pridėti dalis
+            </button>
+          )}
+          {showPartAddingSection && (
+            <button className="app-btn app-btn-primary" onClick={addOrderItems}>
+              Išsaugoti
+            </button>
+          )}
+        </div>
         {showPartAddingSection && returnPartAddingSection()}
         {showAddedParts && (
           <div style={styles.column}>
             <h2 style={text.sectionTitle}>Užsakymo dalys</h2>
+
             <div style={layout.content}>
               {orderItems.length === 0 ? (
                 <p style={layout.emptyState}>Dalių dar nepridėta</p>
@@ -429,5 +469,13 @@ const styles = {
     flexDirection: "column",
     gap: space.md,
     minWidth: 0,
+  },
+  partsHeaderContainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    gap: space.md,
+    paddingBottom: space.md,
+    borderBottom: `1px solid ${colors.border}`,
   },
 };

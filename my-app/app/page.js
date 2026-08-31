@@ -126,6 +126,7 @@ export default function Home() {
           income: 0,
           total_price: 0,
           status: "Active",
+          mileage: "0",
         },
       ])
       .select();
