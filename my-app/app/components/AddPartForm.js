@@ -134,6 +134,7 @@ export default function AddPartForm({
             aria-invalid={errors.partPrice ? true : undefined}
             aria-describedby={errors.partPrice ? "part-price-error" : undefined}
           />
+          <p>Kliento kaina: {(partPrice * (1 + profitPercentage / 100)).toFixed(2)}</p>
           {errors.partPrice && (
             <span id="part-price-error" style={formStyles.error} role="alert">
               {errors.partPrice}

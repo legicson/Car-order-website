@@ -428,6 +428,12 @@ export default function orderList({ params }) {
             </span>
           </div>
           <div style={styles.totalRow}>
+            <span style={styles.totalLabelMuted}>Dalys su antkainiu</span>
+            <span style={styles.totalValueMuted}>
+              {formatPrice(totalRetailPrice)}
+            </span>
+          </div>
+          <div style={styles.totalRow}>
             <span style={styles.totalLabelMuted}>Darbai</span>
             <span style={styles.totalValueMuted}>{formatPrice(labor)}</span>
           </div>

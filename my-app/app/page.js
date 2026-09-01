@@ -127,10 +127,9 @@ export default function Home() {
       .insert([
         {
           car_id: car.id,
-          income: 0,
-          total_price: 0,
           status: "Active",
           mileage: "0",
+          labor: "0",
         },
       ])
       .select();
