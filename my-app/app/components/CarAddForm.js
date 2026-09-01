@@ -17,6 +17,7 @@ export default function CarAddForm({
   prevStep,
   commnent,
   setCommnent,
+  submitText,
 }) {
   const [errors, setErrors] = useState({});
 
@@ -154,7 +155,7 @@ export default function CarAddForm({
 
       <div style={formStyles.buttonRow}>
         <button type="submit" className="app-btn app-btn-primary">
-          Sukurti
+          {submitText}
         </button>
         <button
           type="button"
