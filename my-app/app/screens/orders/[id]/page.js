@@ -27,9 +27,10 @@ export default function orderList({ params }) {
   const router = useRouter();
   const [showPartAddingSection, setShowPartAddingSection] = useState(false);
   const [showAddedParts, setShowAddedParts] = useState(true);
-  const [showMileageSection, setShowMileageSection] = useState(false);
+  const [showOrderDetailsSection, setShowOrderDetailsSection] = useState(false);
 
   const { id } = use(params);
+
   const [car, setCar] = useState(null);
   const [customer, setCustomer] = useState(null);
   const [parts, setParts] = useState([]);
@@ -37,6 +38,7 @@ export default function orderList({ params }) {
   const [totalPrice, setTotalPrice] = useState(0);
   const [totalRetailPrice, setTotalRetailPrice] = useState(0);
   const [mileage, setMileage] = useState("");
+  const [labor, setLabor] = useState("");
   const [status, setStatus] = useState(null);
 
   const [addedParts, setAddedParts] = useState([]);
@@ -139,10 +141,9 @@ export default function orderList({ params }) {
         `
     id,
     created_at,
-    total_price,
-    income,
     status,
     mileage,
+    labor,
     car:cars (
       id,
       car_name,
@@ -165,25 +166,31 @@ export default function orderList({ params }) {
     } else {
       setCar(data.car);
       setCustomer(data.car.customer);
-      setMileage(data.mileage ?? "");
+      console.log(data.mileage);
+      console.log(data.labor);
+      setMileage(data.mileage);
+      setLabor(data.labor);
       setStatus(data.status);
     }
   };
 
-  const saveMileage = async (e) => {
+  const saveOrderDetails = async (e) => {
     e.preventDefault();
 
     const { error } = await supabase
       .from("orders")
-      .update({ mileage: mileage === "" ? null : Number(mileage) })
+      .update({
+        mileage: mileage === "" ? null : Number(mileage),
+        labor: labor === "" ? null : Number(labor),
+      })
       .eq("id", id);
 
     if (error) {
-      console.error("Klaida išsaugant ridą:", error.message);
+      console.error("Klaida išsaugant užsakymo duomenis:", error.message);
       return;
     }
 
-    setShowMileageSection(false);
+    setShowOrderDetailsSection(false);
   };
 
   const saveStatus = async (newStatus) => {
@@ -200,10 +207,10 @@ export default function orderList({ params }) {
     setStatus(newStatus);
   };
 
-  const returnMileageSection = () => {
+  const returnOrderDetailsSection = () => {
     return (
-      <form style={styles.mileageForm} onSubmit={saveMileage}>
-        <div style={styles.mileageField}>
+      <form style={styles.detailsForm} onSubmit={saveOrderDetails}>
+        <div style={styles.detailsField}>
           <label style={text.label} htmlFor="order-mileage">
             Rida (km)
           </label>
@@ -218,14 +225,30 @@ export default function orderList({ params }) {
             placeholder="206000"
           />
         </div>
+        <div style={styles.detailsField}>
+          <label style={text.label} htmlFor="order-labor">
+            Darbai (€)
+          </label>
+          <input
+            id="order-labor"
+            className="app-input"
+            type="number"
+            min="0"
+            step="0.01"
+            inputMode="decimal"
+            value={labor}
+            onChange={(e) => setLabor(e.target.value)}
+            placeholder="80.00"
+          />
+        </div>
         <div style={styles.dashboardActions}>
           <button type="submit" className="app-btn app-btn-primary">
-            Išsaugoti ridą
+            Išsaugoti
           </button>
           <button
             type="button"
             className="app-btn app-btn-secondary"
-            onClick={() => setShowMileageSection(false)}
+            onClick={() => setShowOrderDetailsSection(false)}
           >
             Atšaukti
           </button>
@@ -375,9 +398,11 @@ export default function orderList({ params }) {
           <div style={styles.dashboardActions}>
             <button
               className="app-btn app-btn-secondary"
-              onClick={() => setShowMileageSection(!showMileageSection)}
+              onClick={() =>
+                setShowOrderDetailsSection(!showOrderDetailsSection)
+              }
             >
-              Įvesti ridą
+              Rida ir darbai
             </button>
 
             <StatusDropdown status={status} setStatus={setStatus} />
@@ -393,19 +418,23 @@ export default function orderList({ params }) {
 
         <CustomerCarInfo customer={customer} car={car} mileage={mileage} />
 
-        {showMileageSection && returnMileageSection()}
+        {showOrderDetailsSection && returnOrderDetailsSection()}
 
         <div style={styles.totals}>
           <div style={styles.totalRow}>
-            <span style={styles.totalLabelMuted}>Savikaina</span>
+            <span style={styles.totalLabelMuted}>Dalių savikaina</span>
             <span style={styles.totalValueMuted}>
               {formatPrice(totalPrice)}
             </span>
           </div>
           <div style={styles.totalRow}>
+            <span style={styles.totalLabelMuted}>Darbai</span>
+            <span style={styles.totalValueMuted}>{formatPrice(labor)}</span>
+          </div>
+          <div style={styles.totalRow}>
             <span style={styles.totalLabel}>Bendra suma</span>
             <span style={styles.totalValue}>
-              {formatPrice(totalRetailPrice)}
+              {formatPrice(totalRetailPrice + toAmount(labor))}
             </span>
           </div>
         </div>
@@ -472,7 +501,7 @@ const styles = {
     flexWrap: "wrap",
     gap: space.sm,
   },
-  mileageForm: {
+  detailsForm: {
     display: "flex",
     flexWrap: "wrap",
     alignItems: "flex-end",
@@ -480,7 +509,7 @@ const styles = {
     paddingTop: space.lg,
     borderTop: `1px solid ${colors.border}`,
   },
-  mileageField: {
+  detailsField: {
     display: "flex",
     flexDirection: "column",
     gap: space.xs,

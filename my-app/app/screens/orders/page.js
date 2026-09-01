@@ -59,13 +59,26 @@ export default function orders({ children }) {
     fetchOrders();
   }, []);
 
+  // Both totals stay numbers so OrderCard can subtract them; the card's
+  // formatMoney adds the euro sign.
+  const toAmount = (value) => Number(value) || 0;
+
   const calculateOrderTotalPrice = (order) => {
+    return order.order_items.reduce(
+      (sum, item) => sum + item.quantity * toAmount(item.price_at_sale),
+      0,
+    );
+  };
+
+  const calculateOrderTotalIncome = (order) => {
     const total = order.order_items.reduce(
-      (sum, item) => sum + item.quantity * item.price_at_sale,
+      (sum, item) =>
+        sum +
+        item.quantity * toAmount(item.retail_price ?? item.price_at_sale),
       0,
     );
 
-    return total.toFixed(2);
+    return total + toAmount(order.labor);
   };
 
   const filteredOrdersByStatus =
@@ -184,6 +197,7 @@ export default function orders({ children }) {
               onClick={() => onClickSetSelectedCar(order.id)}
               onDelete={() => {}}
               totalPrice={calculateOrderTotalPrice(order)}
+              totalRevenue={calculateOrderTotalIncome(order)}
               mileage={order.mileage}
             />
           ))

@@ -37,6 +37,7 @@ const OrderCard = ({
   carName,
   createdAt,
   totalPrice,
+  totalRevenue,
   income,
   status,
   onClick,
@@ -75,12 +76,19 @@ const OrderCard = ({
 
       <div style={styles.figures}>
         <div style={styles.figure}>
-          <span style={styles.figureLabel}>Suma</span>
+          <span style={styles.figureLabel}>Savikaina</span>
           <span style={styles.figureValue}>{formatMoney(totalPrice)}</span>
+        </div>
+
+        <div style={styles.figure}>
+          <span style={styles.figureLabel}>Pajamos</span>
+          <span style={styles.figureValue}>{formatMoney(totalRevenue)}</span>
         </div>
         <div style={styles.figure}>
           <span style={styles.figureLabel}>Pelnas</span>
-          <span style={styles.figureValue}>{formatMoney(income)}</span>
+          <span style={styles.figureValue}>
+            {formatMoney(Number(totalRevenue) - Number(totalPrice))}
+          </span>
         </div>
       </div>
 
