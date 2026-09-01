@@ -8,6 +8,21 @@ import Dropdown from "../../../components/UI/Dropdown";
 import { useRouter } from "next/navigation";
 import StatusDropdown from "../../../components/StatusDropdown";
 
+// price/profit_percentage arrive from Supabase as float columns, so they are
+// already numbers; the guards are for rows saved before the columns existed.
+const toAmount = (value) => Number(value) || 0;
+
+const formatPrice = (value) => `${toAmount(value).toFixed(2)} €`;
+
+// Retail = the part's own price plus its profit margin, rounded to cents.
+const calculateRetailPrice = (price, profitPercentage) =>
+  Math.round(toAmount(price) * (1 + toAmount(profitPercentage) / 100) * 100) /
+  100;
+
+// Rows written before retail_price existed fall back to the bare price.
+const orderItemRetailPrice = (orderItem) =>
+  toAmount(orderItem.retail_price ?? orderItem.price_at_sale);
+
 export default function orderList({ params }) {
   const router = useRouter();
   const [showPartAddingSection, setShowPartAddingSection] = useState(false);
@@ -20,6 +35,7 @@ export default function orderList({ params }) {
   const [parts, setParts] = useState([]);
   const [orderItems, setOrderItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [totalRetailPrice, setTotalRetailPrice] = useState(0);
   const [mileage, setMileage] = useState("");
   const [status, setStatus] = useState(null);
 
@@ -36,7 +52,7 @@ export default function orderList({ params }) {
   }, [showPartAddingSection]);
 
   useEffect(() => {
-    calculateOrderTotalPrice();
+    calculateOrderTotals();
   }, [orderItems]);
 
   const fetchParts = async () => {
@@ -62,14 +78,18 @@ export default function orderList({ params }) {
     }
   };
 
-  const calculateOrderTotalPrice = () => {
-    const total = orderItems.reduce(
-      (sum, item) => sum + item.quantity * item.price_at_sale,
+  const calculateOrderTotals = () => {
+    const cost = orderItems.reduce(
+      (sum, item) => sum + item.quantity * toAmount(item.price_at_sale),
+      0,
+    );
+    const retail = orderItems.reduce(
+      (sum, item) => sum + item.quantity * orderItemRetailPrice(item),
       0,
     );
 
-    setTotalPrice(total.toFixed(2));
-    return total.toFixed(2);
+    setTotalPrice(cost);
+    setTotalRetailPrice(retail);
   };
 
   const deleteOrderItem = async (orderItemId) => {
@@ -95,7 +115,11 @@ export default function orderList({ params }) {
           order_id: id,
           part_id: part.id,
           quantity: part.quantity,
-          price_at_sale: part.price,
+          price_at_sale: toAmount(part.price),
+          retail_price: calculateRetailPrice(
+            part.price,
+            part.profit_percentage,
+          ),
         },
       ]);
 
@@ -210,6 +234,15 @@ export default function orderList({ params }) {
     );
   };
 
+  // Retail is what the customer pays, so it leads; the bare part price sits
+  // underneath it as the cost line.
+  const returnPriceStack = (retail, cost) => (
+    <span style={styles.priceStack}>
+      <span>{formatPrice(retail)}</span>
+      <span style={styles.priceCost}>Savikaina: {formatPrice(cost)}</span>
+    </span>
+  );
+
   const returnAddedParts = () => {
     return addedParts.map((part) => (
       <PartsCard
@@ -222,7 +255,10 @@ export default function orderList({ params }) {
             <p>Kiekis: {part.quantity}</p>
           </>
         }
-        price={`${part.price} €`}
+        price={returnPriceStack(
+          calculateRetailPrice(part.price, part.profit_percentage),
+          part.price,
+        )}
       />
     ));
   };
@@ -286,7 +322,10 @@ export default function orderList({ params }) {
         key={part.id}
         header={part.partName}
         details={<p>Kodas: {part.partNumber}</p>}
-        price={`${part.price} €`}
+        price={returnPriceStack(
+          calculateRetailPrice(part.price, part.profit_percentage),
+          part.price,
+        )}
         onClick={() => selectCard(part.id)}
       />
     ));
@@ -311,7 +350,10 @@ export default function orderList({ params }) {
             <p>Kiekis: {orderItem.quantity}</p>
           </>
         }
-        price={`${orderItem.price_at_sale} €`}
+        price={returnPriceStack(
+          orderItemRetailPrice(orderItem),
+          orderItem.price_at_sale,
+        )}
       />
     ));
   };
@@ -353,9 +395,19 @@ export default function orderList({ params }) {
 
         {showMileageSection && returnMileageSection()}
 
-        <div style={styles.totalRow}>
-          <span style={styles.totalLabel}>Bendra suma</span>
-          <span style={styles.totalValue}>{totalPrice} €</span>
+        <div style={styles.totals}>
+          <div style={styles.totalRow}>
+            <span style={styles.totalLabelMuted}>Savikaina</span>
+            <span style={styles.totalValueMuted}>
+              {formatPrice(totalPrice)}
+            </span>
+          </div>
+          <div style={styles.totalRow}>
+            <span style={styles.totalLabel}>Bendra suma</span>
+            <span style={styles.totalValue}>
+              {formatPrice(totalRetailPrice)}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -435,16 +487,42 @@ const styles = {
     flex: "1 1 200px",
     maxWidth: "240px",
   },
+  totals: {
+    display: "flex",
+    flexDirection: "column",
+    gap: space.xs,
+    paddingTop: space.lg,
+    borderTop: `1px solid ${colors.border}`,
+  },
   totalRow: {
     display: "flex",
     alignItems: "baseline",
     justifyContent: "space-between",
     gap: space.md,
-    paddingTop: space.lg,
-    borderTop: `1px solid ${colors.border}`,
   },
   totalLabel: {
     ...text.label,
+  },
+  totalLabelMuted: {
+    ...text.label,
+    color: colors.textSubtle,
+  },
+  totalValueMuted: {
+    fontSize: "1rem",
+    fontWeight: 600,
+    fontVariantNumeric: "tabular-nums",
+    color: colors.textMuted,
+  },
+  priceStack: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+    gap: "2px",
+  },
+  priceCost: {
+    fontSize: "0.75rem",
+    fontWeight: 500,
+    color: colors.textMuted,
   },
   totalValue: {
     fontSize: "1.5rem",

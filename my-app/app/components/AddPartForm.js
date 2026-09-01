@@ -12,16 +12,22 @@ export default function AddPartForm({
   setPartPrice,
   partNumber,
   setPartNumber,
+  replacementCode,
+  setReplacementCode,
+  profitPercentage,
+  setProfitPercentage,
   handlePartAdding,
   setShowPartForm,
   resetValues,
+  submitButtonText,
 }) {
   const [errors, setErrors] = useState({});
 
-  // Pavadinimas and Kaina are required; the part code is optional.
+  // Pavadinimas, Kaina and Pelno procentas are required; the codes are
+  // optional.
   const validators = {
     partName: (value) => {
-      const trimmed = value.trim();
+      const trimmed = String(value ?? "").trim();
       if (!trimmed) return "Įveskite dalies pavadinimą.";
       if (trimmed.length < NAME_MIN_LENGTH) {
         return `Pavadinimas turi būti bent ${NAME_MIN_LENGTH} simbolių.`;
@@ -31,10 +37,19 @@ export default function AddPartForm({
     // Both pages parse the price with a comma-to-dot swap, so accept either
     // separator here rather than rejecting "12,50".
     partPrice: (value) => {
-      const trimmed = value.trim();
+      const trimmed = String(value ?? "").trim();
       if (!trimmed) return "Įveskite dalies kainą.";
       if (!/^\d+([.,]\d+)?$/.test(trimmed)) {
         return "Kaina turi būti teigiamas skaičius.";
+      }
+      return "";
+    },
+    // Same comma-or-dot rule as the price, but capped at two decimals.
+    profitPercentage: (value) => {
+      const trimmed = String(value ?? "").trim();
+      if (!trimmed) return "Įveskite pelno procentą.";
+      if (!/^\d+([.,]\d{1,2})?$/.test(trimmed)) {
+        return "Pelno procentas turi būti skaičius su ne daugiau nei 2 skaičiais po kablelio.";
       }
       return "";
     },
@@ -63,16 +78,17 @@ export default function AddPartForm({
     const nextErrors = {
       partName: validators.partName(partName),
       partPrice: validators.partPrice(partPrice),
+      profitPercentage: validators.profitPercentage(profitPercentage),
     };
     setErrors(nextErrors);
-    if (nextErrors.partName || nextErrors.partPrice) return;
+    if (Object.values(nextErrors).some(Boolean)) return;
 
     handlePartAdding(e);
   };
 
   return (
     <form onSubmit={handleSubmit} style={formStyles.card} noValidate>
-      <h2 style={formStyles.title}>Nauja dalis</h2>
+      <h2 style={formStyles.title}>Dalis</h2>
 
       <div style={formStyles.fields}>
         <div style={formStyles.field}>
@@ -138,11 +154,56 @@ export default function AddPartForm({
             placeholder="132-123-123"
           />
         </div>
+        <div style={formStyles.field}>
+          <label style={formStyles.label} htmlFor="replacement-code">
+            Pakeitimo kodas{" "}
+            <span style={formStyles.labelHint}>(neprivaloma)</span>
+          </label>
+          <input
+            id="replacement-code"
+            className="app-input"
+            type="text"
+            value={replacementCode}
+            onChange={(e) => setReplacementCode(e.target.value)}
+            placeholder="ABC-123-XYZ"
+          />
+        </div>
+
+        <div style={formStyles.field}>
+          <label style={formStyles.label} htmlFor="profit-percentage">
+            Pelno procentas
+          </label>
+          <input
+            id="profit-percentage"
+            className="app-input"
+            style={errors.profitPercentage ? formStyles.inputError : undefined}
+            type="text"
+            inputMode="decimal"
+            value={profitPercentage}
+            onChange={handleChange("profitPercentage", setProfitPercentage)}
+            onBlur={handleBlur("profitPercentage")}
+            placeholder="10"
+            required
+            aria-invalid={errors.profitPercentage ? true : undefined}
+            aria-describedby={
+              errors.profitPercentage ? "profit-percentage-error" : undefined
+            }
+          />
+          {errors.profitPercentage && (
+            <span
+              id="profit-percentage-error"
+              style={formStyles.error}
+              role="alert"
+            >
+              {errors.profitPercentage}
+            </span>
+          )}
+        </div>
       </div>
 
       <div style={formStyles.buttonRow}>
         <button type="submit" className="app-btn app-btn-primary">
-          Sukurti
+          {submitButtonText}
         </button>
         <button
           type="button"
@@ -150,6 +211,7 @@ export default function AddPartForm({
           onClick={() => {
             setErrors({});
             setShowPartForm(false);
+
             resetValues();
           }}
         >

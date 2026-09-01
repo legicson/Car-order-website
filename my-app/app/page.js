@@ -35,6 +35,8 @@ export default function Home() {
   const [partName, setPartName] = useState("");
   const [partPrice, setPartPrice] = useState("");
   const [partNumber, setPartNumber] = useState("");
+  const [replacementCode, setReplacementCode] = useState("");
+  const [profitPercentage, setProfitPercentage] = useState("");
 
   const resetValues = () => {
     setCustomerName("");
@@ -51,6 +53,8 @@ export default function Home() {
     setPartName("");
     setPartPrice("");
     setPartNumber("");
+    setReplacementCode("");
+    setProfitPercentage("");
   };
 
   // Navigacijos funkcijos
@@ -146,6 +150,8 @@ export default function Home() {
         partName: partName,
         price: normalizedPrice,
         partNumber: partNumber,
+        replacement_code: replacementCode,
+        profit_percentage: profitPercentage,
       },
     ]);
 
@@ -323,6 +329,10 @@ export default function Home() {
             setPartPrice={setPartPrice}
             partNumber={partNumber}
             setPartNumber={setPartNumber}
+            replacementCode={replacementCode}
+            setReplacementCode={setReplacementCode}
+            profitPercentage={profitPercentage}
+            setProfitPercentage={setProfitPercentage}
             handlePartAdding={handlePartAdding}
             setShowPartForm={setShowPartForm}
             resetValues={resetValues}

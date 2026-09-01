@@ -11,12 +11,16 @@ import { supabase } from "../../supabaseClient";
 
 export default function cars({ children }) {
   const [showPartForm, setShowPartForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
   const [parts, setParts] = useState([]);
   const [search, setSearch] = useState("");
 
   const [partName, setPartName] = useState("");
   const [partPrice, setPartPrice] = useState("");
   const [partNumber, setPartNumber] = useState("");
+  const [replacementCode, setReplacementCode] = useState("");
+  const [profitPercentage, setProfitPercentage] = useState("");
+  const [selectedPart, setSelectedPart] = useState(null);
 
   const addPart = async () => {
     const normalizedPrice = parseFloat(String(partPrice).replace(",", "."));
@@ -25,6 +29,8 @@ export default function cars({ children }) {
         partName: partName,
         price: normalizedPrice,
         partNumber: partNumber,
+        replacement_code: replacementCode,
+        profit_percentage: profitPercentage,
       },
     ]);
 
@@ -37,20 +43,70 @@ export default function cars({ children }) {
     }
   };
 
+  const editPart = async (partId) => {
+    const normalizedPrice = parseFloat(String(partPrice).replace(",", "."));
+    const { error } = await supabase
+      .from("parts")
+      .update({
+        partName: partName,
+        price: normalizedPrice,
+        partNumber: partNumber,
+        replacement_code: replacementCode,
+        profit_percentage: profitPercentage,
+      })
+      .eq("id", partId);
+
+    if (error) {
+      console.error("Klaida redaguojant dalį:", error.message);
+    } else {
+      setShowEditForm(false);
+      resetValues();
+      fetchParts(); // Atkuriame dalis po redagavimo
+    }
+  };
+
+  const deletePart = async (partId) => {
+    const { error } = await supabase
+      .from("parts")
+      .update({ active: false })
+      .eq("id", partId);
+
+    if (error) {
+      console.error("Klaida trinant dalį:", error.message);
+    } else {
+      fetchParts(); // Atkuriame dalis po trynimo
+    }
+  };
+
   const handlePartAdding = (e) => {
     e.preventDefault();
     addPart();
     resetValues();
   };
 
+  const handlePartEdit = (e) => {
+    e.preventDefault();
+    editPart(selectedPart.id);
+    resetValues();
+  };
+
+  const handlePartDelete = (partId) => {
+    deletePart(partId);
+  };
+
   const resetValues = () => {
     setPartName("");
     setPartPrice("");
     setPartNumber("");
+    setReplacementCode("");
+    setProfitPercentage("");
   };
 
   const fetchParts = async () => {
-    const { data, error } = await supabase.from("parts").select("*");
+    const { data, error } = await supabase
+      .from("parts")
+      .select("*")
+      .eq("active", true);
 
     if (error) {
       console.error("Klaida gaunant dalis:", error.message);
@@ -80,9 +136,24 @@ export default function cars({ children }) {
         header={part.partName}
         details={part.partNumber}
         price={part.price}
-        onDelete={() => {}}
+        onDelete={() => handlePartDelete(part.id)}
+        onClick={() => onPartCardClick(part)}
       />
     ));
+  };
+
+  // The numeric columns come back as numbers, but the form fields are text
+  // inputs, so everything has to land in state as a string.
+  const toFieldValue = (value) => (value == null ? "" : String(value));
+
+  const onPartCardClick = (part) => {
+    setPartName(toFieldValue(part.partName));
+    setPartPrice(toFieldValue(part.price));
+    setPartNumber(toFieldValue(part.partNumber));
+    setReplacementCode(toFieldValue(part.replacement_code));
+    setProfitPercentage(toFieldValue(part.profit_percentage));
+    setSelectedPart(part);
+    setShowEditForm(true);
   };
 
   return (
@@ -99,7 +170,7 @@ export default function cars({ children }) {
         <Dropdown />
       </div>
 
-      {!showPartForm && (
+      {!showPartForm && !showEditForm && (
         <>
           <div style={styles.toolbar}>
             <CustomButton
@@ -159,6 +230,32 @@ export default function cars({ children }) {
             handlePartAdding={handlePartAdding}
             setShowPartForm={setShowPartForm}
             resetValues={resetValues}
+            replacementCode={replacementCode}
+            setReplacementCode={setReplacementCode}
+            profitPercentage={profitPercentage}
+            setProfitPercentage={setProfitPercentage}
+            submitButtonText={"Sukurti"}
+          />
+        </div>
+      )}
+
+      {showEditForm && (
+        <div style={styles.formWrapper}>
+          <AddPartForm
+            partName={partName}
+            setPartName={setPartName}
+            partPrice={partPrice}
+            setPartPrice={setPartPrice}
+            partNumber={partNumber}
+            setPartNumber={setPartNumber}
+            replacementCode={replacementCode}
+            setReplacementCode={setReplacementCode}
+            profitPercentage={profitPercentage}
+            setProfitPercentage={setProfitPercentage}
+            handlePartAdding={handlePartEdit}
+            setShowPartForm={setShowEditForm}
+            resetValues={resetValues}
+            submitButtonText={"Išsaugoti"}
           />
         </div>
       )}
