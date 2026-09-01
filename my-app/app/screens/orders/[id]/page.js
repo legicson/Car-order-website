@@ -23,13 +23,14 @@ const calculateRetailPrice = (price, profitPercentage) =>
 const orderItemRetailPrice = (orderItem) =>
   toAmount(orderItem.retail_price ?? orderItem.price_at_sale);
 
-export default function orderList({ params }) {
+export default function orderList({ params, searchParams }) {
   const router = useRouter();
   const [showPartAddingSection, setShowPartAddingSection] = useState(false);
   const [showAddedParts, setShowAddedParts] = useState(true);
   const [showOrderDetailsSection, setShowOrderDetailsSection] = useState(false);
 
   const { id } = use(params);
+  const { origin } = use(searchParams);
 
   const [car, setCar] = useState(null);
   const [customer, setCustomer] = useState(null);
@@ -191,6 +192,23 @@ export default function orderList({ params }) {
     }
 
     setShowOrderDetailsSection(false);
+  };
+
+  const saveCostAndIncome = async () => {
+    // e.preventDefault();
+
+    const { error } = await supabase
+      .from("orders")
+      .update({
+        cost_of_goods: toAmount(totalPrice),
+        income: toAmount(totalRetailPrice) + toAmount(labor),
+      })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Klaida išsaugant užsakymo duomenis:", error.message);
+      return;
+    }
   };
 
   const saveStatus = async (newStatus) => {
@@ -387,7 +405,14 @@ export default function orderList({ params }) {
       return;
     }
     saveStatus(status);
-    router.push("/screens/orders");
+    saveCostAndIncome();
+    if (origin === "main") {
+      router.push("/");
+
+      return;
+    } else {
+      router.push("/screens/orders");
+    }
   };
 
   return (
@@ -411,7 +436,7 @@ export default function orderList({ params }) {
               className="app-btn app-btn-primary"
               onClick={returnToOrders}
             >
-              Grįžti į užsakymus
+              Išsaugoti ir grįžti
             </button>
           </div>
         </div>

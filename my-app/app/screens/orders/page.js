@@ -351,6 +351,7 @@ export default function orders({ children }) {
                 customerName={order.cars.customers.name}
                 carName={order.cars.car_name}
                 createdAt={order.created_at}
+                costOfGoods={order.cost_of_goods}
                 income={order.income}
                 status={order.status}
                 onClick={() => onClickSetSelectedOrder(order.id)}

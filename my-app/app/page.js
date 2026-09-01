@@ -12,6 +12,7 @@ import CarAddForm from "./components/CarAddForm";
 import { layout, text } from "./theme";
 import NewPartFlow from "./components/NewPartFlow";
 import NewCustomerFlow from "./components/NewCustomerFlow";
+import OrderCard from "./components/OrderCard";
 
 export default function Home() {
   const router = useRouter();
@@ -63,6 +64,34 @@ export default function Home() {
   // Navigacijos funkcijos
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
+
+  async function fetchOrders() {
+    const { data, error } = await supabase
+      .from("orders")
+      .select(
+        `
+      *,
+      order_items (
+        *,
+        parts (*)
+      ),
+      cars (
+        *,
+        customers (*)
+      )
+    `,
+      )
+      .in("status", ["Active", "Waiting for parts"]);
+
+    if (error) {
+      console.error("Error fetching all orders:", error);
+      return null;
+    }
+
+    setOrders(
+      data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
+    );
+  }
 
   const fetchCustomers = async () => {
     const { data, error } = await supabase.from("customers").select("*");
@@ -165,6 +194,7 @@ export default function Home() {
   useEffect(() => {
     fetchCustomers();
     fetchCars();
+    fetchOrders();
   }, []);
 
   const handlePartAdding = (e) => {
@@ -299,9 +329,30 @@ export default function Home() {
     );
   };
 
+  const onClickSetSelectedOrder = async (orderId) => {
+    router.push(`/screens/orders/${orderId}?origin=main`);
+  };
+  const toAmount = (value) => Number(value) || 0;
+  const calculateOrderTotalPrice = (order) => {
+    return order.order_items.reduce(
+      (sum, item) => sum + item.quantity * toAmount(item.price_at_sale),
+      0,
+    );
+  };
+
+  const calculateOrderTotalIncome = (order) => {
+    const total = order.order_items.reduce(
+      (sum, item) =>
+        sum + item.quantity * toAmount(item.retail_price ?? item.price_at_sale),
+      0,
+    );
+
+    return total + toAmount(order.labor);
+  };
+
   return (
     <div style={layout.page}>
-      {!showOrderForm && !showCustomerForm && !showCarForm && (
+      {!showOrderForm && !showCustomerForm && !showCarForm && !showPartForm && (
         <>
           <div style={layout.header}>
             <div>
@@ -322,7 +373,33 @@ export default function Home() {
         </>
       )}
 
-      <div style={style.content}>
+      <div style={{ ...layout.content, ...style.content }}>
+        {!showOrderForm &&
+          !showCustomerForm &&
+          !showCarForm &&
+          !showPartForm &&
+          (orders.length === 0 ? (
+            <p>Užsakymų dar nėra</p>
+          ) : (
+            orders.map((order) => (
+              <OrderCard
+                key={order.id}
+                id={order.id}
+                customerName={order.cars.customers.name}
+                carName={order.cars.car_name}
+                createdAt={order.created_at}
+                costOfGoods={order.cost_of_goods}
+                income={order.income}
+                status={order.status}
+                onClick={() => onClickSetSelectedOrder(order.id)}
+                onDelete={() => {}}
+                totalPrice={calculateOrderTotalPrice(order)}
+                totalRevenue={calculateOrderTotalIncome(order)}
+                mileage={order.mileage}
+              />
+            ))
+          ))}
+
         {showPartForm && (
           <NewPartFlow
             showPartForm={showPartForm}

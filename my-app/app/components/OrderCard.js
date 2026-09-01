@@ -32,6 +32,7 @@ const formatMoney = (value) => {
 };
 
 const OrderCard = ({
+  costOfGoods,
   id,
   customerName,
   carName,
@@ -77,17 +78,17 @@ const OrderCard = ({
       <div style={styles.figures}>
         <div style={styles.figure}>
           <span style={styles.figureLabel}>Savikaina</span>
-          <span style={styles.figureValue}>{formatMoney(totalPrice)}</span>
+          <span style={styles.figureValue}>{formatMoney(costOfGoods)}</span>
         </div>
 
         <div style={styles.figure}>
           <span style={styles.figureLabel}>Pajamos</span>
-          <span style={styles.figureValue}>{formatMoney(totalRevenue)}</span>
+          <span style={styles.figureValue}>{formatMoney(income)}</span>
         </div>
         <div style={styles.figure}>
           <span style={styles.figureLabel}>Pelnas</span>
           <span style={styles.figureValue}>
-            {formatMoney(Number(totalRevenue) - Number(totalPrice))}
+            {formatMoney(Number(income) - Number(costOfGoods))}
           </span>
         </div>
       </div>
