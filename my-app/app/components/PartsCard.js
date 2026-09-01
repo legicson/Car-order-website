@@ -48,6 +48,7 @@ const styles = {
     border: `1px solid ${colors.border}`,
     borderRadius: radius.lg,
     boxShadow: shadow.sm,
+    marginBottom: space.md,
   },
   info: {
     display: "flex",

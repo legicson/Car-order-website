@@ -10,11 +10,14 @@ import AddCustomerForm from "./components/AddCustomerForm";
 import AddPartForm from "./components/AddPartForm";
 import CarAddForm from "./components/CarAddForm";
 import { layout, text } from "./theme";
+import NewPartFlow from "./components/NewPartFlow";
+import NewCustomerFlow from "./components/NewCustomerFlow";
 
 export default function Home() {
   const router = useRouter();
   const [customers, setCustomers] = useState([]);
   const [cars, setCars] = useState([]);
+  const [orders, setOrders] = useState([]);
 
   const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [step, setStep] = useState(1);
@@ -61,7 +64,7 @@ export default function Home() {
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
 
-  const fetchUsers = async () => {
+  const fetchCustomers = async () => {
     const { data, error } = await supabase.from("customers").select("*");
 
     if (error) {
@@ -160,7 +163,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchCustomers();
     fetchCars();
   }, []);
 
@@ -187,7 +190,7 @@ export default function Home() {
 
     if (newCustomerId) {
       await addCar(newCustomerId);
-      fetchUsers();
+      fetchCustomers();
       fetchCars();
       resetValues();
     } else {
@@ -321,20 +324,10 @@ export default function Home() {
 
       <div style={style.content}>
         {showPartForm && (
-          <AddPartForm
-            partName={partName}
-            setPartName={setPartName}
-            partPrice={partPrice}
-            setPartPrice={setPartPrice}
-            partNumber={partNumber}
-            setPartNumber={setPartNumber}
-            replacementCode={replacementCode}
-            setReplacementCode={setReplacementCode}
-            profitPercentage={profitPercentage}
-            setProfitPercentage={setProfitPercentage}
-            handlePartAdding={handlePartAdding}
+          <NewPartFlow
+            showPartForm={showPartForm}
             setShowPartForm={setShowPartForm}
-            resetValues={resetValues}
+            fetchParts={() => {}}
           />
         )}
 
@@ -359,32 +352,14 @@ export default function Home() {
           ((step === 1 && returnSelectableCustomerList()) ||
             (step === 2 && returnCarListForOrder()))}
 
-        {showCustomerForm &&
-          ((step === 1 && (
-            <AddCustomerForm
-              customerName={customerName}
-              setCustomerName={setCustomerName}
-              customerPhone={customerPhone}
-              setCustomerPhone={setCustomerPhone}
-              handleContinueClick={handleContinueClick}
-              setShowCustomerForm={setShowCustomerForm}
-              resetValues={resetValues}
-            />
-          )) ||
-            (step === 2 && (
-              <CarAddForm
-                carName={carName}
-                setCarName={setCarName}
-                registrationNumber={registrationNumber}
-                setRegistrationNumber={setRegistrationNumber}
-                year={year}
-                setYear={setYear}
-                handleAddingCarCustomer={handleAddingCarCustomer}
-                prevStep={prevStep}
-                commnent={commnent}
-                setCommnent={setCommnent}
-              />
-            )))}
+        {showCustomerForm && (
+          <NewCustomerFlow
+            showCustomerForm={showCustomerForm}
+            setShowCustomerForm={setShowCustomerForm}
+            fetchCustomers={() => {}}
+            fetchCars={() => {}}
+          />
+        )}
       </div>
     </div>
   );

@@ -15,9 +15,11 @@ export default function CarAddForm({
   setYear,
   handleAddingCarCustomer,
   prevStep,
-  commnent,
-  setCommnent,
+  comment,
+  setComment,
   submitText,
+  vin,
+  setVin,
 }) {
   const [errors, setErrors] = useState({});
 
@@ -48,7 +50,10 @@ export default function CarAddForm({
   };
 
   const handleBlur = (field) => (e) => {
-    setErrors((prev) => ({ ...prev, [field]: validators[field](e.target.value) }));
+    setErrors((prev) => ({
+      ...prev,
+      [field]: validators[field](e.target.value),
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -92,22 +97,6 @@ export default function CarAddForm({
             </span>
           )}
         </div>
-
-        <div style={formStyles.field}>
-          <label style={formStyles.label} htmlFor="car-registration">
-            Registracijos numeris{" "}
-            <span style={formStyles.labelHint}>(neprivaloma)</span>
-          </label>
-          <input
-            id="car-registration"
-            className="app-input"
-            type="text"
-            value={registrationNumber}
-            onChange={(e) => setRegistrationNumber(e.target.value)}
-            placeholder="ABC123"
-          />
-        </div>
-
         <div style={formStyles.field}>
           <label style={formStyles.label} htmlFor="car-year">
             Metai
@@ -132,23 +121,49 @@ export default function CarAddForm({
             </span>
           )}
         </div>
+        <div style={formStyles.field}>
+          <label style={formStyles.label} htmlFor="car-registration">
+            Registracijos numeris{" "}
+            <span style={formStyles.labelHint}>(neprivaloma)</span>
+          </label>
+          <input
+            id="car-registration"
+            className="app-input"
+            type="text"
+            value={registrationNumber}
+            onChange={(e) => setRegistrationNumber(e.target.value)}
+            placeholder="ABC123"
+          />
+        </div>
+        <div style={formStyles.field}>
+          <label style={formStyles.label} htmlFor="car-vin">
+            VIN kodas <span style={formStyles.labelHint}>(neprivaloma)</span>
+          </label>
+          <input
+            id="car-vin"
+            className="app-input"
+            type="text"
+            value={vin}
+            onChange={(e) => setVin(e.target.value)}
+            placeholder="1HGCM82633A123456"
+          />
+        </div>
 
         <div style={formStyles.field}>
           <label style={formStyles.label} htmlFor="car-comment">
-            Komentaras{" "}
-            <span style={formStyles.labelHint}>(neprivaloma)</span>
+            Komentaras <span style={formStyles.labelHint}>(neprivaloma)</span>
           </label>
           <textarea
             id="car-comment"
             className="app-input"
-            value={commnent}
-            onChange={(e) => setCommnent(e.target.value)}
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
             placeholder="Papildoma informacija"
             maxLength={COMMENT_MAX_LENGTH}
             rows={4}
           />
           <span style={formStyles.labelHint}>
-            {commnent.length}/{COMMENT_MAX_LENGTH}
+            {comment.length}/{COMMENT_MAX_LENGTH}
           </span>
         </div>
       </div>

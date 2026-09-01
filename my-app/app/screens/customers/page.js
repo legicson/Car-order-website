@@ -15,18 +15,23 @@ import CustomerCard from "../../components/CustomerCard";
 
 import AddCustomerForm from "../../components/AddCustomerForm";
 import CarAddForm from "../../components/CarAddForm";
+import NewCustomerFlow from "../../components/NewCustomerFlow";
 
 export default function Customers({ children }) {
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState("");
   const [showCustomerForm, setShowCustomerForm] = useState(false);
+  const [showEditCustomerForm, setShowEditCustomerForm] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [carName, setCarName] = useState("");
   const [registrationNumber, setRegistrationNumber] = useState("");
   const [year, setYear] = useState("");
+  const [vin, setVin] = useState("");
+  const [comment, setComment] = useState("");
   const [step, setStep] = useState(1);
   const [showCarForm, setShowCarForm] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   const resetValues = () => {
     setCustomerName("");
@@ -36,6 +41,8 @@ export default function Customers({ children }) {
     setYear("");
     setShowCustomerForm(false);
     setStep(1);
+    setShowEditCustomerForm(false);
+    setSelectedCustomer(null);
   };
 
   const handleContinueClick = () => {
@@ -122,6 +129,16 @@ export default function Customers({ children }) {
     setCustomers(customers);
   }
 
+  const fetchCars = async () => {
+    const { data, error } = await supabase.from("cars").select("*");
+
+    if (error) {
+      console.error("Klaida gaunant automobilius:", error.message);
+    } else {
+      setCars(data);
+    }
+  };
+
   const query = search.trim().toLowerCase();
   const filteredCustomers = query
     ? customers.filter((customer) => {
@@ -132,6 +149,32 @@ export default function Customers({ children }) {
       })
     : customers;
 
+  const handleCustomerClick = (customer) => {
+    setSelectedCustomer(customer);
+    setCustomerName(customer.name);
+    setCustomerPhone(customer.phone_number ?? "");
+    setShowEditCustomerForm(true);
+  };
+
+  const handleEditCustomer = async (e) => {
+    e.preventDefault();
+
+    const { error } = await supabase
+      .from("customers")
+      .update({
+        name: customerName,
+        phone_number: customerPhone,
+      })
+      .eq("id", selectedCustomer.id);
+
+    if (error) {
+      console.error("Klaida redaguojant klientą:", error.message);
+    } else {
+      fetchCustomers();
+      setShowEditCustomerForm(false);
+      resetValues();
+    }
+  };
   return (
     <div style={layout.page}>
       <div style={layout.header}>
@@ -169,39 +212,38 @@ export default function Customers({ children }) {
         </div>
       </div>
       <div style={{ ...layout.content, ...styles.content }}>
-        {showCustomerForm &&
-          ((step === 1 && (
-            <AddCustomerForm
-              customerName={customerName}
-              setCustomerName={setCustomerName}
-              customerPhone={customerPhone}
-              setCustomerPhone={setCustomerPhone}
-              handleContinueClick={handleContinueClick}
-              setShowCustomerForm={setShowCustomerForm}
-              resetValues={resetValues}
-            />
-          )) ||
-            (step === 2 && (
-              <CarAddForm
-                carName={carName}
-                setCarName={setCarName}
-                registrationNumber={registrationNumber}
-                setRegistrationNumber={setRegistrationNumber}
-                year={year}
-                setYear={setYear}
-                handleAddingCarCustomer={handleAddingCarCustomer}
-                prevStep={prevStep}
-              />
-            )))}
+        {showCustomerForm && (
+          <NewCustomerFlow
+            showCustomerForm={showCustomerForm}
+            setShowCustomerForm={setShowCustomerForm}
+            fetchCustomers={fetchCustomers}
+            fetchCars={() => {}}
+          />
+        )}
 
+        {showEditCustomerForm && (
+          <AddCustomerForm
+            customerName={customerName}
+            setCustomerName={setCustomerName}
+            customerPhone={customerPhone}
+            setCustomerPhone={setCustomerPhone}
+            handleContinueClick={handleEditCustomer}
+            setShowCustomerForm={setShowCustomerForm}
+            resetValues={resetValues}
+            submitText={"Išsaugoti"}
+          />
+        )}
         {showCustomerForm === false &&
+          !showEditCustomerForm &&
           filteredCustomers.map((customer) => (
             <CustomerCard
               key={customer.id}
               customerName={customer.name}
               phoneNumber={customer.phone_number}
               cars={customer.cars}
-              onClick={() => {}}
+              onClick={() => {
+                handleCustomerClick(customer);
+              }}
               onClickDelete={() => {}}
             />
           ))}

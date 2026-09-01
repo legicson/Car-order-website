@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import PartsCard from "@/app/components/PartsCard";
 import Dropdown from "@/app/components/UI/Dropdown";
 import { layout, space, text } from "@/app/theme";
+import NewPartFlow from "@/app/components/NewPartFlow";
 
 import { supabase } from "../../supabaseClient";
 
@@ -219,24 +220,11 @@ export default function cars({ children }) {
       )}
 
       {showPartForm && (
-        <div style={styles.formWrapper}>
-          <AddPartForm
-            partName={partName}
-            setPartName={setPartName}
-            partPrice={partPrice}
-            setPartPrice={setPartPrice}
-            partNumber={partNumber}
-            setPartNumber={setPartNumber}
-            handlePartAdding={handlePartAdding}
-            setShowPartForm={setShowPartForm}
-            resetValues={resetValues}
-            replacementCode={replacementCode}
-            setReplacementCode={setReplacementCode}
-            profitPercentage={profitPercentage}
-            setProfitPercentage={setProfitPercentage}
-            submitButtonText={"Sukurti"}
-          />
-        </div>
+        <NewPartFlow
+          showPartForm={showPartForm}
+          setShowPartForm={setShowPartForm}
+          fetchParts={fetchParts}
+        />
       )}
 
       {showEditForm && (
@@ -246,9 +234,9 @@ export default function cars({ children }) {
             setPartName={setPartName}
             partPrice={partPrice}
             setPartPrice={setPartPrice}
-            partNumber={partNumber}
+            partNumber={partNumber ?? ""}
             setPartNumber={setPartNumber}
-            replacementCode={replacementCode}
+            replacementCode={replacementCode ?? ""}
             setReplacementCode={setReplacementCode}
             profitPercentage={profitPercentage}
             setProfitPercentage={setProfitPercentage}

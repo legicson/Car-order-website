@@ -13,6 +13,7 @@ export default function AddCustomerForm({
   handleContinueClick,
   setShowCustomerForm,
   resetValues,
+  submitText,
 }) {
   const [nameError, setNameError] = useState("");
 
@@ -68,7 +69,11 @@ export default function AddCustomerForm({
             aria-describedby={nameError ? "customer-name-error" : undefined}
           />
           {nameError && (
-            <span id="customer-name-error" style={formStyles.error} role="alert">
+            <span
+              id="customer-name-error"
+              style={formStyles.error}
+              role="alert"
+            >
               {nameError}
             </span>
           )}
@@ -92,7 +97,7 @@ export default function AddCustomerForm({
 
       <div style={formStyles.buttonRow}>
         <button type="submit" className="app-btn app-btn-primary">
-          Tęsti
+          {submitText}
         </button>
         <button
           type="button"

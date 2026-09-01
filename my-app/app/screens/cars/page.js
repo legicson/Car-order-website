@@ -23,15 +23,18 @@ export default function cars({ children }) {
   const [comment, setComment] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customers, setCustomers] = useState([]);
+  const [vin, setVin] = useState("");
 
   const resetValues = () => {
     setCarName("");
     setRegistrationNumber("");
     setYear("");
     setComment("");
+    setVin("");
     setSelectedCustomer(null);
     setStep(1);
     setShowCarForm(false);
+    setShowEditCarForm(false);
   };
 
   const fetchCustomers = async () => {
@@ -167,10 +170,10 @@ export default function cars({ children }) {
     setCarName(car.car_name);
     setRegistrationNumber(car.registration_no);
     setYear(car.year);
+    setVin(car.vin ?? "");
     setComment(car.comment);
     setShowEditCarForm(true);
   };
-
 
   const handleCarEdit = async (e) => {
     e.preventDefault();
@@ -182,6 +185,7 @@ export default function cars({ children }) {
         registration_no: registrationNumber,
         year: year,
         comment: comment,
+        vin: vin,
       })
       .eq("id", selectedCar.id);
 
@@ -255,15 +259,20 @@ export default function cars({ children }) {
           <CarAddForm
             carName={carName}
             setCarName={setCarName}
-            registrationNumber={registrationNumber}
+            registrationNumber={registrationNumber ?? ""}
             setRegistrationNumber={setRegistrationNumber}
             year={year}
             setYear={setYear}
-            commnent={comment}
-            setCommnent={setComment}
+            vin={vin ?? ""}
+            setVin={setVin}
+            comment={comment ?? ""}
+            setComment={setComment}
             handleAddingCarCustomer={handleCarEdit}
-            prevStep={()=> setShowEditCarForm(false)}
-            submitText ={"Išsaugoti"}
+            prevStep={() => {
+              resetValues();
+              setShowEditCarForm(false);
+            }}
+            submitText={"Išsaugoti"}
           />
         )}
 
@@ -277,8 +286,10 @@ export default function cars({ children }) {
                 setRegistrationNumber={setRegistrationNumber}
                 year={year}
                 setYear={setYear}
-                commnent={comment}
-                setCommnent={setComment}
+                vin={vin}
+                setVin={setVin}
+                comment={comment}
+                setComment={setComment}
                 handleAddingCarCustomer={handleAddingCarCustomer}
                 prevStep={prevStep}
                 submitText={"Pridėti"}

@@ -7,6 +7,7 @@ import Dropdown from "../../components/UI/Dropdown";
 import { layout, text, colors, radius } from "../../theme";
 import CustomButton from "../../components/UI/CustomButton";
 import { useRouter } from "next/navigation";
+import Card from "../../components/Card";
 
 const STATUS_COLORS = {
   Active: { color: colors.warning, backgroundColor: colors.warningSoft },
@@ -25,7 +26,21 @@ export default function orders({ children }) {
   const [status, setStatus] = useState("All");
   const [search, setSearch] = useState("");
   const [mileage, setMileage] = useState("");
+  const [showOrderForm, setShowOrderForm] = useState(false);
+  const [step, setStep] = useState(1);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedCar, setSelectedCar] = useState(null);
+  const [customers, setCustomers] = useState([]);
+  const [cars, setCars] = useState([]);
 
+  // Navigacijos funkcijos
+  const nextStep = () => setStep((prev) => prev + 1);
+  const prevStep = () => setStep((prev) => prev - 1);
+  const resetValues = () => {
+    setSelectedCustomer(null);
+    setSelectedCar(null);
+    setStep(1);
+  };
   async function fetchOrders() {
     const { data, error } = await supabase.from("orders").select(`
       *,
@@ -49,6 +64,26 @@ export default function orders({ children }) {
     );
   }
 
+  const fetchUsers = async () => {
+    const { data, error } = await supabase.from("customers").select("*");
+
+    if (error) {
+      console.error("Klaida gaunant vartotojus:", error.message);
+    } else {
+      setCustomers(data);
+    }
+  };
+
+  const fetchCars = async () => {
+    const { data, error } = await supabase.from("cars").select("*");
+
+    if (error) {
+      console.error("Klaida gaunant automobilius:", error.message);
+    } else {
+      setCars(data);
+    }
+  };
+
   const getStatusStyle = (status) =>
     STATUS_COLORS[status] ?? {
       color: colors.accent,
@@ -57,6 +92,8 @@ export default function orders({ children }) {
 
   useEffect(() => {
     fetchOrders();
+    fetchUsers();
+    fetchCars();
   }, []);
 
   // Both totals stay numbers so OrderCard can subtract them; the card's
@@ -73,8 +110,7 @@ export default function orders({ children }) {
   const calculateOrderTotalIncome = (order) => {
     const total = order.order_items.reduce(
       (sum, item) =>
-        sum +
-        item.quantity * toAmount(item.retail_price ?? item.price_at_sale),
+        sum + item.quantity * toAmount(item.retail_price ?? item.price_at_sale),
       0,
     );
 
@@ -96,10 +132,130 @@ export default function orders({ children }) {
       })
     : filteredOrdersByStatus;
 
-  const onClickSetSelectedCar = async (orderId) => {
+  const onClickSetSelectedOrder = async (orderId) => {
     router.push(`/screens/orders/${orderId}`);
   };
 
+  const returnSelectableCustomerList = () => {
+    return (
+      <div style={styles.picker}>
+        <h2 style={styles.pickerTitle}>
+          {showOrderForm
+            ? "Pasirinkite klientą naujam užsakymui"
+            : "Pasirinkite klientą, kuriam norite pridėti automobilį"}
+        </h2>
+        <div style={styles.pickerActions}>
+          <button
+            type="button"
+            className="app-btn app-btn-secondary"
+            onClick={() => {
+              setShowOrderForm(false);
+              resetValues();
+            }}
+          >
+            Atšaukti
+          </button>
+        </div>
+        <div style={layout.list}>
+          {customers.map((customer) => (
+            <Card
+              key={customer.id}
+              id={customer.id}
+              header={customer.name}
+              addionalDetails={customer.phone_number}
+              onClick={() => onClickSetSelectedCustomer(customer)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const returnCarListForOrder = () => {
+    if (!selectedCustomer) return null;
+    const customerCars = cars.filter(
+      (car) => car.user_id === selectedCustomer.id,
+    );
+    return (
+      <div style={styles.picker}>
+        <h2 style={styles.pickerTitle}>Pasirinkite automobilį</h2>
+        <div style={styles.pickerActions}>
+          <button
+            type="button"
+            className="app-btn app-btn-secondary"
+            onClick={() => {
+              prevStep();
+            }}
+          >
+            Grįžti
+          </button>
+          <button
+            type="button"
+            className="app-btn app-btn-secondary"
+            onClick={() => {
+              setShowOrderForm(false);
+              resetValues();
+            }}
+          >
+            Atšaukti
+          </button>
+        </div>
+        <div style={layout.list}>
+          {customerCars.length === 0 ? (
+            <p style={layout.emptyState}>
+              Šis klientas dar neturi pridėtų automobilių
+            </p>
+          ) : (
+            customerCars.map((car) => (
+              <Card
+                key={car.id}
+                id={car.id}
+                header={car.car_name}
+                addionalDetails={car.registration_no}
+                onClick={() => {
+                  onClickSetSelectedCar(car);
+                }}
+              />
+            ))
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const onClickSetSelectedCustomer = (item) => {
+    setSelectedCustomer(item);
+    nextStep();
+  };
+
+  const onClickSetSelectedCar = async (item) => {
+    const orderId = await addOrder(item);
+    setShowOrderForm(false);
+    resetValues();
+    router.push(`/screens/orders/${orderId}`);
+  };
+
+  const addOrder = async (car) => {
+    if (!car) return;
+
+    const { data, error } = await supabase
+      .from("orders")
+      .insert([
+        {
+          car_id: car.id,
+          status: "Active",
+          mileage: "0",
+          labor: "0",
+        },
+      ])
+      .select();
+
+    if (error) {
+      console.error("Klaida pridedant uzsakyma:", error.message);
+    } else {
+      return data[0].id;
+    }
+  };
   return (
     <div style={layout.page}>
       <div style={layout.header}>
@@ -111,7 +267,10 @@ export default function orders({ children }) {
 
           <div style={styles.searchContainer}>
             <div style={styles.searchWrapper}>
-              <CustomButton ButtonText="Pridėti klientą" onClick={() => {}} />
+              <CustomButton
+                ButtonText="Sukurti užsakymą"
+                onClick={() => setShowOrderForm(true)}
+              />
               <input
                 className="app-input"
                 style={styles.searchInput}
@@ -125,7 +284,6 @@ export default function orders({ children }) {
                 <button
                   type="button"
                   className="app-icon-btn"
-                  style={styles.clearButton}
                   onClick={() => setSearch("")}
                   aria-label="Išvalyti paiešką"
                 >
@@ -182,26 +340,31 @@ export default function orders({ children }) {
       </div>
 
       <div style={layout.content}>
-        {filteredOrders.length === 0 ? (
-          <p style={layout.emptyState}>Užsakymų dar nėra</p>
-        ) : (
-          filteredOrders.map((order) => (
-            <OrderCard
-              key={order.id}
-              id={order.id}
-              customerName={order.cars.customers.name}
-              carName={order.cars.car_name}
-              createdAt={order.created_at}
-              income={order.income}
-              status={order.status}
-              onClick={() => onClickSetSelectedCar(order.id)}
-              onDelete={() => {}}
-              totalPrice={calculateOrderTotalPrice(order)}
-              totalRevenue={calculateOrderTotalIncome(order)}
-              mileage={order.mileage}
-            />
-          ))
-        )}
+        {!showOrderForm &&
+          (filteredOrders.length === 0 ? (
+            <p style={layout.emptyState}>Užsakymų dar nėra</p>
+          ) : (
+            filteredOrders.map((order) => (
+              <OrderCard
+                key={order.id}
+                id={order.id}
+                customerName={order.cars.customers.name}
+                carName={order.cars.car_name}
+                createdAt={order.created_at}
+                income={order.income}
+                status={order.status}
+                onClick={() => onClickSetSelectedOrder(order.id)}
+                onDelete={() => {}}
+                totalPrice={calculateOrderTotalPrice(order)}
+                totalRevenue={calculateOrderTotalIncome(order)}
+                mileage={order.mileage}
+              />
+            ))
+          ))}
+
+        {showOrderForm &&
+          ((step === 1 && returnSelectableCustomerList()) ||
+            (step === 2 && returnCarListForOrder()))}
       </div>
     </div>
   );
@@ -221,8 +384,6 @@ const styles = {
   },
   statusFilter: {
     display: "flex",
-    // max-width: "100px",
-    // textAlign: "center",
     flex: "1",
     border: `2px solid ${colors.border}`,
     marginLeft: "2%",
@@ -233,9 +394,7 @@ const styles = {
   },
   searchStatusWrapper: {
     display: "flex",
-    // width: "50%",
     flex: 1,
-    // backgroundColor: "green",
     justifyContent: "space-between",
   },
   searchWrapper: {
@@ -248,11 +407,24 @@ const styles = {
   searchContainer: {
     display: "flex",
     justifyContent: "space-between",
-    // alignItems: "center",
     width: "100%",
   },
   searchInput: {
-    // paddingRight: "40px",
     marginLeft: "10px",
+  },
+  picker: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+    width: "100%",
+    maxWidth: "80%",
+  },
+  pickerTitle: {
+    ...text.pageTitle,
+    fontSize: "1.35rem",
+  },
+  pickerActions: {
+    display: "flex",
+    gap: "8px",
   },
 };
