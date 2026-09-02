@@ -2,16 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient"; // Importuojame klientą
-import OrderCard from "../../components/OrderCard";
+import OrderCard from "../../components/cards/OrderCard";
 import Dropdown from "../../components/UI/Dropdown";
 import { layout, text, colors, radius } from "../../theme";
 import CustomButton from "../../components/UI/CustomButton";
 import { useRouter } from "next/navigation";
-import Card from "../../components/Card";
+import Card from "../../components/cards/Card";
 
 const STATUS_COLORS = {
   Active: { color: colors.warning, backgroundColor: colors.warningSoft },
-  // Active: { color: colors.warning, backgroundColor: colors.warningSoft },
   Finished: { color: colors.success, backgroundColor: colors.successSoft },
   "Waiting for parts": {
     color: colors.danger,
@@ -25,11 +24,9 @@ export default function orders({ children }) {
   const [orders, setOrders] = useState([]);
   const [status, setStatus] = useState("All");
   const [search, setSearch] = useState("");
-  const [mileage, setMileage] = useState("");
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [step, setStep] = useState(1);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [selectedCar, setSelectedCar] = useState(null);
   const [customers, setCustomers] = useState([]);
   const [cars, setCars] = useState([]);
 
@@ -38,7 +35,6 @@ export default function orders({ children }) {
   const prevStep = () => setStep((prev) => prev - 1);
   const resetValues = () => {
     setSelectedCustomer(null);
-    setSelectedCar(null);
     setStep(1);
   };
   async function fetchOrders() {

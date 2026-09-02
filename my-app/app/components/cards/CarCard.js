@@ -1,6 +1,5 @@
-import React from "react";
 import PropTypes from "prop-types";
-import { colors, radius, shadow, space } from "../theme";
+import { colors, radius, shadow, space } from "../../theme";
 
 const Detail = ({ label, value }) => (
   <div style={styles.detail}>

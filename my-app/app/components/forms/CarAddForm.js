@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import formStyles from "./UI/formStyles";
+import formStyles from "../UI/formStyles";
 
 const EARLIEST_YEAR = 1900;
 const COMMENT_MAX_LENGTH = 250;

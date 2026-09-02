@@ -1,10 +1,8 @@
-import React from "react";
 import PropTypes from "prop-types";
-import { colors, radius, shadow, space } from "../theme";
+import { colors, radius, shadow, space } from "../../theme";
 
 const STATUS_COLORS = {
   Active: { color: colors.warning, backgroundColor: colors.warningSoft },
-  // Active: { color: colors.warning, backgroundColor: colors.warningSoft },
   Finished: { color: colors.success, backgroundColor: colors.successSoft },
   "Waiting for parts": {
     color: colors.danger,

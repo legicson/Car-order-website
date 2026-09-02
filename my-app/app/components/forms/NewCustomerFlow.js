@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/app/supabaseClient";
-import AddCustomerForm from "@/app/components/AddCustomerForm";
-import CarAddForm from "@/app/components/CarAddForm";
-import { space, text } from "@/app/theme";
+import AddCustomerForm from "@/app/components/forms/AddCustomerForm";
+import CarAddForm from "@/app/components/forms/CarAddForm";
 
 export default function NewCustomerFlow({
   showCustomerForm,

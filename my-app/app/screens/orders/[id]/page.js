@@ -1,10 +1,9 @@
 "use client";
 import { supabase } from "./../../../supabaseClient"; // Importuojame klientą
 import { use, useState, useEffect } from "react";
-import CustomerCarInfo from "../../../components/CustomerCarInfo";
-import PartsCard from "../../../components/PartsCard";
+import CustomerCarInfo from "../../../components/cards/CustomerCarInfo";
+import PartsCard from "../../../components/cards/PartsCard";
 import { colors, layout, radius, shadow, space, text } from "../../../theme";
-import Dropdown from "../../../components/UI/Dropdown";
 import { useRouter } from "next/navigation";
 import StatusDropdown from "../../../components/StatusDropdown";
 
@@ -43,7 +42,6 @@ export default function orderList({ params, searchParams }) {
   const [status, setStatus] = useState(null);
 
   const [addedParts, setAddedParts] = useState([]);
-  const [selectedStatus, setSelectedStatus] = useState(null);
 
   useEffect(() => {
     fetchOrderDetails();

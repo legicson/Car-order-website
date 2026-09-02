@@ -2,13 +2,13 @@
 
 import { supabase } from "./../../supabaseClient"; // Importuojame klientą
 import { useState, useEffect } from "react";
-import CarCard from "./../../components/CarCard";
+import CarCard from "./../../components/cards/CarCard";
 import Dropdown from "../../components/UI/Dropdown";
 import SearchInput from "../../components/UI/SearchInput";
 import { layout, space, text } from "../../theme";
-import CarAddForm from "../../components/CarAddForm";
+import CarAddForm from "../../components/forms/CarAddForm";
 import CustomButton from "../../components/UI/CustomButton";
-import Card from "../../components/Card";
+import Card from "../../components/cards/Card";
 
 export default function cars({ children }) {
   const [selectedCar, setSelectedCar] = useState(null);
@@ -134,13 +134,6 @@ export default function cars({ children }) {
   const onClickSetSelectedCustomer = (item) => {
     setSelectedCustomer(item);
     nextStep();
-  };
-
-  const onClickSetSelectedCar = async (item) => {
-    const orderId = await addOrder(item);
-    setShowOrderForm(false);
-    resetValues();
-    router.push(`/screens/orders/${orderId}`);
   };
 
   const nextStep = () => setStep((prev) => prev + 1);
@@ -315,10 +308,6 @@ const styles = {
 };
 
 const style = {
-  subtitle: {
-    ...text.muted,
-    margin: "4px 0 0",
-  },
   content: {
     display: "flex",
     flexDirection: "column",

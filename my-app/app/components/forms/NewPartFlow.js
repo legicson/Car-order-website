@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/app/supabaseClient";
-import AddPartForm from "@/app/components/AddPartForm";
-import { space, text } from "@/app/theme";
+import AddPartForm from "@/app/components/forms/AddPartForm";
 
 export default function NewPartFlow({
   showPartForm,
@@ -75,34 +74,9 @@ export default function NewPartFlow({
 }
 
 const styles = {
-  subtitle: {
-    ...text.muted,
-    margin: "4px 0 0",
-  },
   formWrapper: {
     display: "flex",
     justifyContent: "center",
     width: "100%",
-  },
-  toolbar: {
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "center",
-    gap: space.md,
-    width: "100%",
-  },
-  searchWrapper: {
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-    flex: "1 1 260px",
-    maxWidth: "420px",
-  },
-  searchInput: {
-    paddingRight: "40px",
-  },
-  clearButton: {
-    position: "absolute",
-    right: "4px",
   },
 };

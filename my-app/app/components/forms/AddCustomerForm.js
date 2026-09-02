@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import formStyles from "./UI/formStyles";
+import formStyles from "../UI/formStyles";
 
 const NAME_MIN_LENGTH = 3;
 

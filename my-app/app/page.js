@@ -4,15 +4,13 @@ import Dropdown from "./components/UI/Dropdown";
 import { useState, useEffect } from "react";
 import AddButtonsRow from "./components/UI/AddButtonsRow";
 import { supabase } from "./supabaseClient"; // Importuojame klientą
-import Card from "./components/Card";
+import Card from "./components/cards/Card";
 import { useRouter } from "next/navigation";
-import AddCustomerForm from "./components/AddCustomerForm";
-import AddPartForm from "./components/AddPartForm";
-import CarAddForm from "./components/CarAddForm";
+import CarAddForm from "./components/forms/CarAddForm";
 import { layout, text } from "./theme";
-import NewPartFlow from "./components/NewPartFlow";
-import NewCustomerFlow from "./components/NewCustomerFlow";
-import OrderCard from "./components/OrderCard";
+import NewPartFlow from "./components/forms/NewPartFlow";
+import NewCustomerFlow from "./components/forms/NewCustomerFlow";
+import OrderCard from "./components/cards/OrderCard";
 
 export default function Home() {
   const router = useRouter();
@@ -36,11 +34,6 @@ export default function Home() {
   const [showCarForm, setShowCarForm] = useState(false);
 
   const [showPartForm, setShowPartForm] = useState(false);
-  const [partName, setPartName] = useState("");
-  const [partPrice, setPartPrice] = useState("");
-  const [partNumber, setPartNumber] = useState("");
-  const [replacementCode, setReplacementCode] = useState("");
-  const [profitPercentage, setProfitPercentage] = useState("");
 
   const resetValues = () => {
     setCustomerName("");
@@ -54,11 +47,6 @@ export default function Home() {
     setShowCustomerForm(false);
     setShowCarForm(false);
     setShowPartForm(false);
-    setPartName("");
-    setPartPrice("");
-    setPartNumber("");
-    setReplacementCode("");
-    setProfitPercentage("");
   };
 
   // Navigacijos funkcijos
@@ -173,40 +161,11 @@ export default function Home() {
     }
   };
 
-  const addPart = async () => {
-    if (!partName.trim()) return;
-    const normalizedPrice = parseFloat(String(partPrice).replace(",", "."));
-    const { error } = await supabase.from("parts").insert([
-      {
-        partName: partName,
-        price: normalizedPrice,
-        partNumber: partNumber,
-        replacement_code: replacementCode,
-        profit_percentage: profitPercentage,
-      },
-    ]);
-
-    if (error) {
-      console.error("Klaida pridedant dali:", error.message);
-    }
-  };
-
   useEffect(() => {
     fetchCustomers();
     fetchCars();
     fetchOrders();
   }, []);
-
-  const handlePartAdding = (e) => {
-    e.preventDefault();
-    addPart();
-    resetValues();
-  };
-
-  const handleContinueClick = (e) => {
-    e.preventDefault();
-    nextStep();
-  };
 
   const handleAddingCarCustomer = async (e) => {
     e.preventDefault();

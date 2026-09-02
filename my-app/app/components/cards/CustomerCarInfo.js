@@ -1,6 +1,5 @@
-import React from "react";
 import PropTypes from "prop-types";
-import { colors, space } from "../theme";
+import { colors, space } from "../../theme";
 
 const Field = ({ label, value }) => (
   <div style={styles.field}>

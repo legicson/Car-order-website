@@ -1,12 +1,12 @@
 "use client";
 
 import CustomButton from "@/app/components/UI/CustomButton";
-import AddPartForm from "@/app/components/AddPartForm";
+import AddPartForm from "@/app/components/forms/AddPartForm";
 import { useState, useEffect } from "react";
-import PartsCard from "@/app/components/PartsCard";
+import PartsCard from "@/app/components/cards/PartsCard";
 import Dropdown from "@/app/components/UI/Dropdown";
 import { layout, space, text } from "@/app/theme";
-import NewPartFlow from "@/app/components/NewPartFlow";
+import NewPartFlow from "@/app/components/forms/NewPartFlow";
 
 import { supabase } from "../../supabaseClient";
 

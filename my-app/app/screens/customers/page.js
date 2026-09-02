@@ -3,19 +3,13 @@
 import { supabase } from "./../../supabaseClient"; // Importuojame klientą
 import { useState, useEffect } from "react";
 import CustomButton from "../../components/UI/CustomButton";
-import ModalWrapper from "./../../components/ModalWrapper";
 import Dropdown from "../../components/UI/Dropdown";
 
-import Card from "./../../components/Card";
-import CustomerForm from "./../../components/CustomerForm";
-import CarForm from "./../../components/CarForm";
-import CustomerDetailedForm from "./../../components/CustomerDetailedForm";
-import { layout, space, text } from "../../theme";
-import CustomerCard from "../../components/CustomerCard";
+import { layout, space } from "../../theme";
+import CustomerCard from "../../components/cards/CustomerCard";
 
-import AddCustomerForm from "../../components/AddCustomerForm";
-import CarAddForm from "../../components/CarAddForm";
-import NewCustomerFlow from "../../components/NewCustomerFlow";
+import AddCustomerForm from "../../components/forms/AddCustomerForm";
+import NewCustomerFlow from "../../components/forms/NewCustomerFlow";
 
 export default function Customers({ children }) {
   const [customers, setCustomers] = useState([]);
@@ -24,92 +18,14 @@ export default function Customers({ children }) {
   const [showEditCustomerForm, setShowEditCustomerForm] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
-  const [carName, setCarName] = useState("");
-  const [registrationNumber, setRegistrationNumber] = useState("");
-  const [year, setYear] = useState("");
-  const [vin, setVin] = useState("");
-  const [comment, setComment] = useState("");
-  const [step, setStep] = useState(1);
-  const [showCarForm, setShowCarForm] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   const resetValues = () => {
     setCustomerName("");
     setCustomerPhone("");
-    setCarName("");
-    setRegistrationNumber("");
-    setYear("");
     setShowCustomerForm(false);
-    setStep(1);
     setShowEditCustomerForm(false);
     setSelectedCustomer(null);
-  };
-
-  const handleContinueClick = () => {
-    if (customerName.trim() === "") {
-      alert("Prašome užpildyti visus laukus.");
-      return;
-    }
-    setStep(2);
-  };
-  const addCustomer = async () => {
-    if (!customerName.trim()) return;
-
-    const { data, error } = await supabase
-      .from("customers")
-      .insert([
-        {
-          name: customerName,
-          phone_number: customerPhone,
-        },
-      ])
-      .select();
-
-    if (error) {
-      console.error("Klaida pridedant vartotoją:", error.message);
-    } else {
-      return data[0].id;
-    }
-  };
-
-  const addCar = async (newCustomerId) => {
-    if (!carName.trim()) return;
-
-    const { error } = await supabase.from("cars").insert([
-      {
-        car_name: carName,
-        registration_no: registrationNumber,
-        year: year,
-        user_id: newCustomerId,
-      },
-    ]);
-
-    if (error) {
-      console.error("Klaida pridedant automobilį:", error.message);
-    }
-  };
-  const handleAddingCarCustomer = async (e) => {
-    e.preventDefault();
-
-    let newCustomerId;
-    if (showCarForm) {
-      newCustomerId = selectedCustomer.id;
-    } else {
-      newCustomerId = await addCustomer();
-    }
-
-    if (newCustomerId) {
-      await addCar(newCustomerId);
-      fetchCustomers();
-      // fetchCars();
-      resetValues();
-    } else {
-      console.log("Nepavyko prideti kliento");
-    }
-  };
-
-  const prevStep = () => {
-    setStep(1);
   };
 
   useEffect(() => {
@@ -128,16 +44,6 @@ export default function Customers({ children }) {
 
     setCustomers(customers);
   }
-
-  const fetchCars = async () => {
-    const { data, error } = await supabase.from("cars").select("*");
-
-    if (error) {
-      console.error("Klaida gaunant automobilius:", error.message);
-    } else {
-      setCars(data);
-    }
-  };
 
   const query = search.trim().toLowerCase();
   const filteredCustomers = query
@@ -253,15 +159,6 @@ export default function Customers({ children }) {
 }
 
 const styles = {
-  subtitle: {
-    ...text.muted,
-    margin: "4px 0 0",
-  },
-  formWrapper: {
-    display: "flex",
-    justifyContent: "center",
-    width: "100%",
-  },
   toolbar: {
     display: "flex",
     flexWrap: "wrap",

@@ -1,6 +1,5 @@
-import React from "react";
 import PropTypes from "prop-types";
-import { colors, radius, shadow, space } from "../theme";
+import { colors, radius, shadow, space } from "../../theme";
 
 // Above this many cars the list is replaced by a plain count.
 const MAX_VISIBLE_CARS = 3;
