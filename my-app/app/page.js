@@ -81,7 +81,7 @@ export default function Home() {
       )
     `,
       )
-      .in("status", ["Active", "Waiting for parts"]);
+      .in("status", ["Active", "Waiting for parts", "Finished"]);
 
     if (error) {
       console.error("Error fetching all orders:", error);
@@ -350,6 +350,18 @@ export default function Home() {
     return total + toAmount(order.labor);
   };
 
+  const calculateOrderTotalProfit = () => {
+    return orders
+      .filter((order) => order.status === "Finished")
+      .reduce(
+        (sum, order) =>
+          sum +
+          calculateOrderTotalIncome(order) -
+          calculateOrderTotalPrice(order),
+        0,
+      );
+  };
+
   return (
     <div style={layout.page}>
       {!showOrderForm && !showCustomerForm && !showCarForm && !showPartForm && (
@@ -360,6 +372,7 @@ export default function Home() {
               <p style={style.subtitle}>
                 Sukurkite užsakymą arba papildykite serviso duomenis
               </p>
+              <p>Viso pelnas: {calculateOrderTotalProfit()}</p>
             </div>
             <Dropdown />
           </div>
@@ -381,23 +394,27 @@ export default function Home() {
           (orders.length === 0 ? (
             <p>Užsakymų dar nėra</p>
           ) : (
-            orders.map((order) => (
-              <OrderCard
-                key={order.id}
-                id={order.id}
-                customerName={order.cars.customers.name}
-                carName={order.cars.car_name}
-                createdAt={order.created_at}
-                costOfGoods={order.cost_of_goods}
-                income={order.income}
-                status={order.status}
-                onClick={() => onClickSetSelectedOrder(order.id)}
-                onDelete={() => {}}
-                totalPrice={calculateOrderTotalPrice(order)}
-                totalRevenue={calculateOrderTotalIncome(order)}
-                mileage={order.mileage}
-              />
-            ))
+            orders
+              .filter((order) =>
+                ["Active", "Waiting for parts"].includes(order.status),
+              )
+              .map((order) => (
+                <OrderCard
+                  key={order.id}
+                  id={order.id}
+                  customerName={order.cars.customers.name}
+                  carName={order.cars.car_name}
+                  createdAt={order.created_at}
+                  costOfGoods={order.cost_of_goods}
+                  income={order.income}
+                  status={order.status}
+                  onClick={() => onClickSetSelectedOrder(order.id)}
+                  onDelete={() => {}}
+                  totalPrice={calculateOrderTotalPrice(order)}
+                  totalRevenue={calculateOrderTotalIncome(order)}
+                  mileage={order.mileage}
+                />
+              ))
           ))}
 
         {showPartForm && (
