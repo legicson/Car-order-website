@@ -26,7 +26,8 @@ export default function Home() {
   const [carName, setCarName] = useState("");
   const [registrationNumber, setRegistrationNumber] = useState("");
   const [year, setYear] = useState("");
-  const [commnent, setCommnent] = useState("");
+  const [comment, setComment] = useState("");
+  const [vin, setVin] = useState("");
 
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -41,7 +42,8 @@ export default function Home() {
     setCarName("");
     setRegistrationNumber("");
     setYear("");
-    setCommnent("");
+    setComment("");
+    setVin("");
     setSelectedCustomer(null);
     setStep(1);
     setShowCustomerForm(false);
@@ -130,7 +132,8 @@ export default function Home() {
         registration_no: registrationNumber,
         year: year,
         user_id: newCustomerId,
-        comment: commnent,
+        comment: comment,
+        vin: vin,
       },
     ]);
 
@@ -396,10 +399,13 @@ export default function Home() {
                 setRegistrationNumber={setRegistrationNumber}
                 year={year}
                 setYear={setYear}
+                vin={vin}
+                setVin={setVin}
+                comment={comment}
+                setComment={setComment}
                 handleAddingCarCustomer={handleAddingCarCustomer}
                 prevStep={prevStep}
-                commnent={commnent}
-                setCommnent={setCommnent}
+                submitText={"Pridėti"}
               />
             )))}
 
