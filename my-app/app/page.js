@@ -331,17 +331,19 @@ export default function Home() {
               <p style={style.subtitle}>
                 Sukurkite užsakymą arba papildykite serviso duomenis
               </p>
-              <p>Viso pelnas: {calculateOrderTotalProfit()}</p>
             </div>
             <Dropdown />
           </div>
 
-          <AddButtonsRow
-            setAddCustomerModalOpen={setShowCustomerForm}
-            setAddOrderModalOpen={setShowOrderForm}
-            setAddCarModalOpen={setShowCarForm}
-            setAddPartModalOpen={setShowPartForm}
-          />
+          <div style={style.selectionRow}>
+            <AddButtonsRow
+              setAddCustomerModalOpen={setShowCustomerForm}
+              setAddOrderModalOpen={setShowOrderForm}
+              setAddCarModalOpen={setShowCarForm}
+              setAddPartModalOpen={setShowPartForm}
+            />
+            <p style={style.totalProfit}>Viso pelnas: {calculateOrderTotalProfit()}</p>
+          </div>
         </>
       )}
 
@@ -443,5 +445,17 @@ const style = {
   pickerActions: {
     display: "flex",
     gap: "8px",
+  },
+  selectionRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    margin: "16px 0",
+  },
+  totalProfit:{
+    ...text.label,
+    fontSize: "1.2rem",
+    fontWeight: "bold",
+    margin: "16px 0",
   },
 };
