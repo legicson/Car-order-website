@@ -411,8 +411,8 @@ export default function Home() {
           <NewCustomerFlow
             showCustomerForm={showCustomerForm}
             setShowCustomerForm={setShowCustomerForm}
-            fetchCustomers={() => {}}
-            fetchCars={() => {}}
+            fetchCustomers={fetchCustomers}
+            fetchCars={fetchCars}
           />
         )}
       </div>
