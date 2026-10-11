@@ -65,6 +65,7 @@ export default function Home() {
         *,
         parts (*)
       ),
+      labor_items (*),
       cars (
         *,
         customers (*)
@@ -152,7 +153,6 @@ export default function Home() {
           car_id: car.id,
           status: "Active",
           mileage: "0",
-          labor: "0",
         },
       ])
       .select();
@@ -309,7 +309,7 @@ export default function Home() {
       0,
     );
 
-    return total + toAmount(order.labor);
+    return total + (order.labor_items || []).reduce((sum, item) => sum + toAmount(item.price), 0);
   };
 
   const calculateOrderTotalProfit = () => {

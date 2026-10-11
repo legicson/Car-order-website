@@ -38,14 +38,19 @@ export default function orderList({ params, searchParams }) {
   const [totalPrice, setTotalPrice] = useState(0);
   const [totalRetailPrice, setTotalRetailPrice] = useState(0);
   const [mileage, setMileage] = useState("");
-  const [labor, setLabor] = useState("");
+  const [laborItems, setLaborItems] = useState([]);
+  const [laborName, setLaborName] = useState("");
+  const [laborPrice, setLaborPrice] = useState("");
   const [status, setStatus] = useState(null);
 
   const [addedParts, setAddedParts] = useState([]);
 
+  const totalLabor = laborItems.reduce((sum, item) => sum + toAmount(item.price), 0);
+
   useEffect(() => {
     fetchOrderDetails();
     fetchParts();
+    fetchLaborItems();
   }, []);
 
   useEffect(() => {
@@ -77,6 +82,57 @@ export default function orderList({ params, searchParams }) {
     } else {
       setOrderItems(data);
     }
+  };
+
+  const fetchLaborItems = async () => {
+    const { data, error } = await supabase
+      .from("labor_items")
+      .select("*")
+      .eq("order_id", id);
+
+    if (error) {
+      console.error("Klaida gaunant darbus:", error.message);
+    } else {
+      setLaborItems(data);
+    }
+  };
+
+  const addLaborItem = async (e) => {
+    e.preventDefault();
+    if (!laborName.trim()) return;
+
+    const { data, error } = await supabase
+      .from("labor_items")
+      .insert([
+        {
+          order_id: id,
+          name: laborName,
+          price: laborPrice === "" ? 0 : Number(laborPrice),
+        },
+      ])
+      .select();
+
+    if (error) {
+      console.error("Klaida pridedant darbą:", error.message);
+    } else {
+      setLaborItems([...laborItems, data[0]]);
+      setLaborName("");
+      setLaborPrice("");
+    }
+  };
+
+  const deleteLaborItem = async (laborItemId) => {
+    const { error } = await supabase
+      .from("labor_items")
+      .delete()
+      .eq("id", laborItemId);
+
+    if (error) {
+      console.error("Klaida šalinant darbą:", error.message);
+      return;
+    }
+
+    setLaborItems(laborItems.filter((item) => item.id !== laborItemId));
   };
 
   const calculateOrderTotals = () => {
@@ -142,7 +198,6 @@ export default function orderList({ params, searchParams }) {
     created_at,
     status,
     mileage,
-    labor,
     car:cars (
       id,
       car_name,
@@ -166,9 +221,7 @@ export default function orderList({ params, searchParams }) {
       setCar(data.car);
       setCustomer(data.car.customer);
       console.log(data.mileage);
-      console.log(data.labor);
       setMileage(data.mileage);
-      setLabor(data.labor);
       setStatus(data.status);
     }
   };
@@ -180,7 +233,6 @@ export default function orderList({ params, searchParams }) {
       .from("orders")
       .update({
         mileage: mileage === "" ? null : Number(mileage),
-        labor: labor === "" ? null : Number(labor),
       })
       .eq("id", id);
 
@@ -199,7 +251,7 @@ export default function orderList({ params, searchParams }) {
       .from("orders")
       .update({
         cost_of_goods: toAmount(totalPrice),
-        income: toAmount(totalRetailPrice) + toAmount(labor),
+        income: toAmount(totalRetailPrice) + totalLabor,
       })
       .eq("id", id);
 
@@ -239,22 +291,6 @@ export default function orderList({ params, searchParams }) {
             value={mileage}
             onChange={(e) => setMileage(e.target.value)}
             placeholder="206000"
-          />
-        </div>
-        <div style={styles.detailsField}>
-          <label style={text.label} htmlFor="order-labor">
-            Darbai (€)
-          </label>
-          <input
-            id="order-labor"
-            className="app-input"
-            type="number"
-            min="0"
-            step="0.01"
-            inputMode="decimal"
-            value={labor}
-            onChange={(e) => setLabor(e.target.value)}
-            placeholder="80.00"
           />
         </div>
         <div style={styles.dashboardActions}>
@@ -443,6 +479,54 @@ export default function orderList({ params, searchParams }) {
 
         {showOrderDetailsSection && returnOrderDetailsSection()}
 
+        <div style={styles.laborSection}>
+          <h3 style={text.label}>Darbai</h3>
+          {laborItems.length > 0 && (
+            <div style={styles.laborList}>
+              {laborItems.map((item) => (
+                <div key={item.id} style={styles.laborItem}>
+                  <span style={styles.laborName}>{item.name}</span>
+                  <span style={styles.laborPrice}>{formatPrice(item.price)}</span>
+                  <button
+                    type="button"
+                    className="app-icon-btn"
+                    onClick={() => deleteLaborItem(item.id)}
+                    aria-label="Pašalinti darbą"
+                  >
+                    &times;
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <form style={styles.laborAddForm} onSubmit={addLaborItem}>
+            <input
+              className="app-input"
+              style={{ flex: "2 1 180px" }}
+              type="text"
+              value={laborName}
+              onChange={(e) => setLaborName(e.target.value)}
+              placeholder="Darbo pavadinimas"
+              required
+            />
+            <input
+              className="app-input"
+              style={{ flex: "1 1 100px", maxWidth: "140px" }}
+              type="number"
+              min="0"
+              step="0.01"
+              inputMode="decimal"
+              value={laborPrice}
+              onChange={(e) => setLaborPrice(e.target.value)}
+              placeholder="Kaina €"
+              required
+            />
+            <button type="submit" className="app-btn app-btn-primary">
+              Pridėti
+            </button>
+          </form>
+        </div>
+
         <div style={styles.totals}>
           <div style={styles.totalRow}>
             <span style={styles.totalLabelMuted}>Dalių savikaina</span>
@@ -458,12 +542,12 @@ export default function orderList({ params, searchParams }) {
           </div>
           <div style={styles.totalRow}>
             <span style={styles.totalLabelMuted}>Darbai</span>
-            <span style={styles.totalValueMuted}>{formatPrice(labor)}</span>
+            <span style={styles.totalValueMuted}>{formatPrice(totalLabor)}</span>
           </div>
           <div style={styles.totalRow}>
             <span style={styles.totalLabel}>Bendra suma</span>
             <span style={styles.totalValue}>
-              {formatPrice(totalRetailPrice + toAmount(labor))}
+              {formatPrice(totalRetailPrice + totalLabor)}
             </span>
           </div>
         </div>
@@ -613,5 +697,44 @@ const styles = {
     gap: space.md,
     paddingBottom: space.md,
     borderBottom: `1px solid ${colors.border}`,
+  },
+  laborSection: {
+    display: "flex",
+    flexDirection: "column",
+    gap: space.sm,
+    paddingTop: space.lg,
+    borderTop: `1px solid ${colors.border}`,
+  },
+  laborList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: space.xs,
+  },
+  laborItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: space.md,
+    padding: `${space.xs} ${space.sm}`,
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: radius.md,
+    border: `1px solid ${colors.border}`,
+  },
+  laborName: {
+    flex: 1,
+    fontSize: "0.9rem",
+    fontWeight: 500,
+    color: colors.text,
+  },
+  laborPrice: {
+    fontSize: "0.9rem",
+    fontWeight: 600,
+    fontVariantNumeric: "tabular-nums",
+    color: colors.text,
+  },
+  laborAddForm: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: space.sm,
   },
 };

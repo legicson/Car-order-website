@@ -44,6 +44,7 @@ export default function orders({ children }) {
         *,
         parts (*)
       ),
+      labor_items (*),
       cars (
         *,
         customers (*)
@@ -110,7 +111,7 @@ export default function orders({ children }) {
       0,
     );
 
-    return total + toAmount(order.labor);
+    return total + (order.labor_items || []).reduce((sum, item) => sum + toAmount(item.price), 0);
   };
 
   const filteredOrdersByStatus =
@@ -241,7 +242,6 @@ export default function orders({ children }) {
           car_id: car.id,
           status: "Active",
           mileage: "0",
-          labor: "0",
         },
       ])
       .select();

@@ -45,14 +45,15 @@ export default function Customers({ children }) {
     setCustomers(customers);
   }
 
+
   const query = search.trim().toLowerCase();
   const filteredCustomers = query
     ? customers.filter((customer) => {
-        const name = String(customer.name ?? "").toLowerCase();
-        const phone = String(customer.phone_number ?? "").toLowerCase();
+      const name = String(customer.name ?? "").toLowerCase();
+      const phone = String(customer.phone_number ?? "").toLowerCase();
 
-        return name.includes(query) || phone.includes(query);
-      })
+      return name.includes(query) || phone.includes(query);
+    })
     : customers;
 
   const handleCustomerClick = (customer) => {
@@ -81,6 +82,7 @@ export default function Customers({ children }) {
       resetValues();
     }
   };
+
   return (
     <div style={layout.page}>
       <div style={layout.header}>
@@ -123,7 +125,7 @@ export default function Customers({ children }) {
             showCustomerForm={showCustomerForm}
             setShowCustomerForm={setShowCustomerForm}
             fetchCustomers={fetchCustomers}
-            fetchCars={() => {}}
+            fetchCars={() => { }}
           />
         )}
 
@@ -150,7 +152,7 @@ export default function Customers({ children }) {
               onClick={() => {
                 handleCustomerClick(customer);
               }}
-              onClickDelete={() => {}}
+              onClickDelete={() => { }}
             />
           ))}
       </div>
