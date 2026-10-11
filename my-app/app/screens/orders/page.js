@@ -303,7 +303,9 @@ export default function orders({ children }) {
               placeholder="Ieškoti pagal vardą arba automobilį"
               label="Ieškoti užsakymų"
             />
-            <div style={styles.chips} role="group" aria-label="Filtruoti pagal statusą">
+       
+          </div>
+               <div style={styles.chips} role="group" aria-label="Filtruoti pagal statusą">
               {STATUS_FILTERS.map((filter) => (
                 <button
                   key={filter.value}
@@ -323,7 +325,6 @@ export default function orders({ children }) {
                 </button>
               ))}
             </div>
-          </div>
         </>
       )}
 
@@ -362,9 +363,15 @@ export default function orders({ children }) {
 
 const styles = {
   chips: {
+    // display: "grid",
+    // gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
     display: "flex",
     flexWrap: "wrap",
+    // minWidth: "200px",
+    // flex: "1 1 auto",
     gap: "8px",
+    // justifyItems: "space-between",
+   
   },
   pickerActions: {
     display: "flex",

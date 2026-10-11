@@ -40,8 +40,9 @@ export default AddButtonsRow;
 
 const style = {
   buttonRow: {
-    display: "flex",
-    flexWrap: "wrap",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+    // flexWrap: "wrap",
     gap: space.sm,
   },
 };
