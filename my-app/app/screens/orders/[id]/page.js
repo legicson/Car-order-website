@@ -285,13 +285,7 @@ export default function orderList({ params, searchParams }) {
           <button type="submit" className="app-btn app-btn-primary">
             Išsaugoti
           </button>
-          <button
-            type="button"
-            className="app-btn app-btn-secondary"
-            onClick={() => setShowOrderDetailsSection(false)}
-          >
-            Atšaukti
-          </button>
+    
         </div>
       </form>
     );
