@@ -4,8 +4,8 @@ import CustomButton from "@/app/components/UI/CustomButton";
 import AddPartForm from "@/app/components/forms/AddPartForm";
 import { useState, useEffect } from "react";
 import PartsCard from "@/app/components/cards/PartsCard";
-import Dropdown from "@/app/components/UI/Dropdown";
-import { layout, space, text } from "@/app/theme";
+import SearchInput from "@/app/components/UI/SearchInput";
+import { layout, text } from "@/app/theme";
 import NewPartFlow from "@/app/components/forms/NewPartFlow";
 
 import { supabase } from "../../supabaseClient";
@@ -158,52 +158,34 @@ export default function cars({ children }) {
   };
 
   return (
-    <div style={layout.page}>
-      <div style={layout.header}>
-        <div>
-          <h1 style={text.pageTitle}>Dalys</h1>
-          <p style={styles.subtitle}>
-            {query
-              ? `Rasta ${filteredParts.length} iš ${parts.length}`
-              : `${parts.length} ${parts.length === 1 ? "dalis" : "dalys"} sandėlyje`}
-          </p>
-        </div>
-        <Dropdown />
-      </div>
-
+    <div className="app-page" style={layout.page}>
       {!showPartForm && !showEditForm && (
         <>
-          <div style={styles.toolbar}>
+          <div style={layout.header}>
+            <div>
+              <h1 style={text.pageTitle}>Dalys</h1>
+              <p style={layout.subtitle}>
+                {query
+                  ? `Rasta ${filteredParts.length} iš ${parts.length}`
+                  : `${parts.length} ${parts.length === 1 ? "dalis" : "dalys"} sandėlyje`}
+              </p>
+            </div>
             <CustomButton
-              ButtonText="Pridėti dalį"
+              ButtonText="+ Pridėti dalį"
               onClick={() => setShowPartForm(true)}
             />
-
-            {parts.length > 0 && (
-              <div style={styles.searchWrapper}>
-                <input
-                  className="app-input"
-                  style={styles.searchInput}
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Ieškoti pagal pavadinimą arba kodą"
-                  aria-label="Ieškoti dalių"
-                />
-                {search && (
-                  <button
-                    type="button"
-                    className="app-icon-btn"
-                    style={styles.clearButton}
-                    onClick={() => setSearch("")}
-                    aria-label="Išvalyti paiešką"
-                  >
-                    &times;
-                  </button>
-                )}
-              </div>
-            )}
           </div>
+
+          {parts.length > 0 && (
+            <div style={layout.toolbar}>
+              <SearchInput
+                value={search}
+                onChange={setSearch}
+                placeholder="Ieškoti pagal pavadinimą arba kodą"
+                label="Ieškoti dalių"
+              />
+            </div>
+          )}
 
           <div style={layout.list}>
             {parts.length === 0 ? (
@@ -252,34 +234,9 @@ export default function cars({ children }) {
 }
 
 const styles = {
-  subtitle: {
-    ...text.muted,
-    margin: "4px 0 0",
-  },
   formWrapper: {
     display: "flex",
     justifyContent: "center",
     width: "100%",
-  },
-  toolbar: {
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "center",
-    gap: space.md,
-    width: "100%",
-  },
-  searchWrapper: {
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-    flex: "1 1 260px",
-    maxWidth: "420px",
-  },
-  searchInput: {
-    paddingRight: "40px",
-  },
-  clearButton: {
-    position: "absolute",
-    right: "4px",
   },
 };

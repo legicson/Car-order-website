@@ -3,9 +3,9 @@
 import { supabase } from "./../../supabaseClient"; // Importuojame klientą
 import { useState, useEffect } from "react";
 import CustomButton from "../../components/UI/CustomButton";
-import Dropdown from "../../components/UI/Dropdown";
+import SearchInput from "../../components/UI/SearchInput";
 
-import { layout, space } from "../../theme";
+import { layout, text } from "../../theme";
 import CustomerCard from "../../components/cards/CustomerCard";
 
 import AddCustomerForm from "../../components/forms/AddCustomerForm";
@@ -83,42 +83,40 @@ export default function Customers({ children }) {
     }
   };
 
+  const isFormOpen = showCustomerForm || showEditCustomerForm;
+
   return (
-    <div style={layout.page}>
-      <div style={layout.header}>
-        <h2>Customers</h2>
-        <Dropdown />
-        <div style={styles.toolbar}>
-          <CustomButton
-            ButtonText="Pridėti klientą"
-            onClick={() => setShowCustomerForm(true)}
-          />
+    <div className="app-page" style={layout.page}>
+      {!isFormOpen && (
+        <>
+          <div style={layout.header}>
+            <div>
+              <h1 style={text.pageTitle}>Klientai</h1>
+              <p style={layout.subtitle}>
+                {query
+                  ? `Rasta ${filteredCustomers.length} iš ${customers.length}`
+                  : `${customers.length} ${customers.length === 1 ? "klientas" : "klientai"}`}
+              </p>
+            </div>
+            <CustomButton
+              ButtonText="+ Pridėti klientą"
+              onClick={() => setShowCustomerForm(true)}
+            />
+          </div>
+
           {customers.length > 0 && (
-            <div style={styles.searchWrapper}>
-              <input
-                className="app-input"
-                style={styles.searchInput}
-                type="text"
+            <div style={layout.toolbar}>
+              <SearchInput
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={setSearch}
                 placeholder="Ieškoti pagal vardą arba telefono numerį"
-                aria-label="Ieškoti klientų"
+                label="Ieškoti klientų"
               />
-              {search && (
-                <button
-                  type="button"
-                  className="app-icon-btn"
-                  style={styles.clearButton}
-                  onClick={() => setSearch("")}
-                  aria-label="Išvalyti paiešką"
-                >
-                  &times;
-                </button>
-              )}
             </div>
           )}
-        </div>
-      </div>
+        </>
+      )}
+
       <div style={{ ...layout.content, ...styles.content }}>
         {showCustomerForm && (
           <NewCustomerFlow
@@ -141,8 +139,15 @@ export default function Customers({ children }) {
             submitText={"Išsaugoti"}
           />
         )}
-        {showCustomerForm === false &&
-          !showEditCustomerForm &&
+        {!isFormOpen && customers.length === 0 && (
+          <p style={{ ...layout.emptyState, width: "100%" }}>Klientų dar nėra</p>
+        )}
+        {!isFormOpen && customers.length > 0 && filteredCustomers.length === 0 && (
+          <p style={{ ...layout.emptyState, width: "100%" }}>
+            Pagal „{search.trim()}“ klientų nerasta
+          </p>
+        )}
+        {!isFormOpen &&
           filteredCustomers.map((customer) => (
             <CustomerCard
               key={customer.id}
@@ -161,27 +166,6 @@ export default function Customers({ children }) {
 }
 
 const styles = {
-  toolbar: {
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "center",
-    gap: space.md,
-    width: "100%",
-  },
-  searchWrapper: {
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-    flex: "1 1 260px",
-    maxWidth: "450px",
-  },
-  searchInput: {
-    paddingRight: "40px",
-  },
-  clearButton: {
-    position: "absolute",
-    right: "4px",
-  },
   content: {
     display: "flex",
     flexDirection: "column",

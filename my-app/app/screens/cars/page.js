@@ -3,9 +3,8 @@
 import { supabase } from "./../../supabaseClient"; // Importuojame klientą
 import { useState, useEffect } from "react";
 import CarCard from "./../../components/cards/CarCard";
-import Dropdown from "../../components/UI/Dropdown";
 import SearchInput from "../../components/UI/SearchInput";
-import { layout, space, text } from "../../theme";
+import { layout, text } from "../../theme";
 import CarAddForm from "../../components/forms/CarAddForm";
 import CustomButton from "../../components/UI/CustomButton";
 import Card from "../../components/cards/Card";
@@ -62,11 +61,14 @@ export default function cars({ children }) {
 
   const returnSelectableCustomerList = () => {
     return (
-      <div style={style.picker}>
-        <h2 style={style.pickerTitle}>
-          "Pasirinkite klientą, kuriam norite pridėti automobilį"
-        </h2>
-        <div style={style.pickerActions}>
+      <div style={layout.picker}>
+        <div style={layout.pickerHeader}>
+          <div>
+            <h2 style={layout.pickerTitle}>
+              Pasirinkite klientą, kuriam norite pridėti automobilį
+            </h2>
+            <p style={layout.subtitle}>1 žingsnis iš 2</p>
+          </div>
           <button
             type="button"
             className="app-btn app-btn-secondary"
@@ -191,42 +193,47 @@ export default function cars({ children }) {
     }
   };
 
-  return (
-    <div style={layout.page}>
-      <div style={layout.header}>
-        <div>
-          <h1 style={text.pageTitle}>Automobiliai</h1>
-          <p style={styles.subtitle}>
-            {query
-              ? `Rasta ${filteredCars.length} iš ${cars.length}`
-              : `${cars.length} ${cars.length === 1 ? "automobilis" : "automobiliai"}`}
-          </p>
-        </div>
-        <Dropdown />
-      </div>
+  const isFormOpen = showCarForm || showEditCarForm;
 
-      {cars.length > 0 && (
-        <div style={styles.toolbar}>
-          <CustomButton
-            ButtonText="Pridėti automobilį"
-            onClick={() => setShowCarForm(true)}
-          />
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder="Ieškoti pagal markę, numerį, VIN, metus ar klientą"
-            label="Ieškoti automobilių"
-          />
-        </div>
+  return (
+    <div className="app-page" style={layout.page}>
+      {!isFormOpen && (
+        <>
+          <div style={layout.header}>
+            <div>
+              <h1 style={text.pageTitle}>Automobiliai</h1>
+              <p style={layout.subtitle}>
+                {query
+                  ? `Rasta ${filteredCars.length} iš ${cars.length}`
+                  : `${cars.length} ${cars.length === 1 ? "automobilis" : "automobiliai"}`}
+              </p>
+            </div>
+            <CustomButton
+              ButtonText="+ Pridėti automobilį"
+              onClick={() => setShowCarForm(true)}
+            />
+          </div>
+
+          {cars.length > 0 && (
+            <div style={layout.toolbar}>
+              <SearchInput
+                value={search}
+                onChange={setSearch}
+                placeholder="Ieškoti pagal markę, numerį, VIN, metus ar klientą"
+                label="Ieškoti automobilių"
+              />
+            </div>
+          )}
+        </>
       )}
 
       <div style={{ ...layout.content, ...style.content }}>
         {!showCarForm &&
           !showEditCarForm &&
           (cars.length === 0 ? (
-            <p style={layout.emptyState}>Automobilių dar nėra</p>
+            <p style={{ ...layout.emptyState, width: "100%" }}>Automobilių dar nėra</p>
           ) : filteredCars.length === 0 ? (
-            <p style={layout.emptyState}>
+            <p style={{ ...layout.emptyState, width: "100%" }}>
               Pagal „{search.trim()}“ automobilių nerasta
             </p>
           ) : (
@@ -293,40 +300,11 @@ export default function cars({ children }) {
   );
 }
 
-const styles = {
-  subtitle: {
-    ...text.muted,
-    margin: "4px 0 0",
-  },
-  toolbar: {
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "center",
-    gap: space.md,
-    width: "100%",
-  },
-};
-
 const style = {
   content: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     width: "100%",
-  },
-  picker: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "16px",
-    width: "100%",
-    maxWidth: "80%",
-  },
-  pickerTitle: {
-    ...text.pageTitle,
-    fontSize: "1.35rem",
-  },
-  pickerActions: {
-    display: "flex",
-    gap: "8px",
   },
 };

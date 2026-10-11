@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { colors, space } from "../../theme";
+import { colors, radius, space } from "../../theme";
 
 const Field = ({ label, value }) => (
   <div style={styles.field}>
@@ -13,22 +13,37 @@ const CustomerCarInfo = ({ customer, car, mileage }) => {
     <div style={styles.root}>
       <Field label="Klientas" value={customer?.name} />
       <Field label="Telefonas" value={customer?.phone_number} />
-      <Field label="Automobilis" value={car?.car_name} />
-      <Field label="Rida" value={mileage} />
+      <Field
+        label="Automobilis"
+        value={
+          car?.car_name
+            ? `${car.car_name}${car.registration_no ? ` · ${car.registration_no}` : ""}`
+            : undefined
+        }
+      />
+      <Field
+        label="Rida"
+        value={mileage || mileage === 0 ? `${mileage} km` : undefined}
+      />
     </div>
   );
 };
 
 const styles = {
   root: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: space.xxl,
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+    gap: space.md,
   },
   field: {
     display: "flex",
     flexDirection: "column",
-    gap: "2px",
+    gap: "4px",
+    padding: `${space.md} ${space.lg}`,
+    backgroundColor: colors.surfaceAlt,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radius.md,
+    minWidth: 0,
   },
   label: {
     fontSize: "0.7rem",
@@ -41,6 +56,7 @@ const styles = {
     fontSize: "1rem",
     fontWeight: 600,
     color: colors.text,
+    overflowWrap: "anywhere",
   },
 };
 
@@ -51,6 +67,7 @@ CustomerCarInfo.propTypes = {
   }),
   car: PropTypes.shape({
     car_name: PropTypes.string,
+    registration_no: PropTypes.string,
   }),
   mileage: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };

@@ -456,10 +456,13 @@ export default function orderList({ params, searchParams }) {
   };
 
   return (
-    <div style={layout.page}>
+    <div className="app-page" style={layout.page}>
       <div style={styles.dashboard}>
         <div style={styles.dashboardTop}>
-          <h1 style={text.pageTitle}>Užsakymas #{id}</h1>
+          <div>
+            <span style={styles.eyebrow}>Užsakymas</span>
+            <h1 style={text.pageTitle}>#{id}</h1>
+          </div>
           <div style={styles.dashboardActions}>
             <button
               className="app-btn app-btn-secondary"
@@ -486,7 +489,7 @@ export default function orderList({ params, searchParams }) {
         {showOrderDetailsSection && returnOrderDetailsSection()}
 
         <div style={styles.laborSection}>
-          <h3 style={text.label}>Darbai</h3>
+          <h3 style={text.sectionTitle}>Darbai</h3>
           {laborItems.length === 0 && legacyLabor > 0 && (
             <div style={styles.laborList}>
               <div style={styles.laborItem}>
@@ -558,7 +561,7 @@ export default function orderList({ params, searchParams }) {
             <span style={styles.totalLabelMuted}>Darbai</span>
             <span style={styles.totalValueMuted}>{formatPrice(totalLabor)}</span>
           </div>
-          <div style={styles.totalRow}>
+          <div style={{ ...styles.totalRow, ...styles.grandTotalRow }}>
             <span style={styles.totalLabel}>Bendra suma</span>
             <span style={styles.totalValue}>
               {formatPrice(totalRetailPrice + totalLabor)}
@@ -643,12 +646,22 @@ const styles = {
     flex: "1 1 200px",
     maxWidth: "240px",
   },
+  eyebrow: {
+    ...text.label,
+    display: "block",
+    color: colors.textSubtle,
+  },
   totals: {
     display: "flex",
     flexDirection: "column",
-    gap: space.xs,
-    paddingTop: space.lg,
-    borderTop: `1px solid ${colors.border}`,
+    gap: space.sm,
+    alignSelf: "flex-end",
+    width: "100%",
+    maxWidth: "380px",
+    padding: space.lg,
+    backgroundColor: colors.surfaceAlt,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radius.md,
   },
   totalRow: {
     display: "flex",
@@ -656,8 +669,14 @@ const styles = {
     justifyContent: "space-between",
     gap: space.md,
   },
+  grandTotalRow: {
+    marginTop: space.xs,
+    paddingTop: space.md,
+    borderTop: `1px dashed ${colors.borderStrong}`,
+  },
   totalLabel: {
     ...text.label,
+    color: colors.text,
   },
   totalLabelMuted: {
     ...text.label,
@@ -681,10 +700,11 @@ const styles = {
     color: colors.textMuted,
   },
   totalValue: {
-    fontSize: "1.5rem",
+    fontSize: "1.6rem",
     fontWeight: 700,
+    letterSpacing: "-0.02em",
     fontVariantNumeric: "tabular-nums",
-    color: colors.text,
+    color: colors.accent,
   },
   content: {
     display: "flex",
@@ -728,7 +748,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: space.md,
-    padding: `${space.xs} ${space.sm}`,
+    padding: `${space.sm} ${space.md}`,
     backgroundColor: colors.surfaceAlt,
     borderRadius: radius.md,
     border: `1px solid ${colors.border}`,

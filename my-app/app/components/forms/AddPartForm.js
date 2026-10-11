@@ -86,6 +86,14 @@ export default function AddPartForm({
     handlePartAdding(e);
   };
 
+  // Accept "12,50" as well as "12.50", matching how the pages save the price.
+  const toNumber = (value) =>
+    Number(String(value ?? "").replace(",", ".")) || 0;
+  const customerPrice = `${(
+    toNumber(partPrice) *
+    (1 + toNumber(profitPercentage) / 100)
+  ).toFixed(2)} €`;
+
   return (
     <form onSubmit={handleSubmit} style={formStyles.card} noValidate>
       <h2 style={formStyles.title}>Dalis</h2>
@@ -134,7 +142,10 @@ export default function AddPartForm({
             aria-invalid={errors.partPrice ? true : undefined}
             aria-describedby={errors.partPrice ? "part-price-error" : undefined}
           />
-          <p>Kliento kaina: {(partPrice * (1 + profitPercentage / 100)).toFixed(2)}</p>
+          <div style={formStyles.computed}>
+            <span>Kliento kaina</span>
+            <span>{customerPrice}</span>
+          </div>
           {errors.partPrice && (
             <span id="part-price-error" style={formStyles.error} role="alert">
               {errors.partPrice}

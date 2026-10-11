@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient"; // Importuojame klientą
 import OrderCard from "../../components/cards/OrderCard";
-import Dropdown from "../../components/UI/Dropdown";
-import { layout, text, colors, radius } from "../../theme";
+import { layout, text, colors } from "../../theme";
+import SearchInput from "../../components/UI/SearchInput";
 import CustomButton from "../../components/UI/CustomButton";
 import { useRouter } from "next/navigation";
 import Card from "../../components/cards/Card";
@@ -18,6 +18,13 @@ const STATUS_COLORS = {
   },
   All: { color: colors.accent, backgroundColor: colors.accentSoft },
 };
+
+const STATUS_FILTERS = [
+  { value: "All", label: "Visi" },
+  { value: "Active", label: "Vykdomi" },
+  { value: "Waiting for parts", label: "Laukia dalių" },
+  { value: "Finished", label: "Baigti" },
+];
 
 export default function orders({ children }) {
   const router = useRouter();
@@ -145,13 +152,14 @@ export default function orders({ children }) {
 
   const returnSelectableCustomerList = () => {
     return (
-      <div style={styles.picker}>
-        <h2 style={styles.pickerTitle}>
-          {showOrderForm
-            ? "Pasirinkite klientą naujam užsakymui"
-            : "Pasirinkite klientą, kuriam norite pridėti automobilį"}
-        </h2>
-        <div style={styles.pickerActions}>
+      <div style={layout.picker}>
+        <div style={layout.pickerHeader}>
+          <div>
+            <h2 style={layout.pickerTitle}>
+              Pasirinkite klientą naujam užsakymui
+            </h2>
+            <p style={layout.subtitle}>1 žingsnis iš 2</p>
+          </div>
           <button
             type="button"
             className="app-btn app-btn-secondary"
@@ -184,9 +192,15 @@ export default function orders({ children }) {
       (car) => car.user_id === selectedCustomer.id,
     );
     return (
-      <div style={styles.picker}>
-        <h2 style={styles.pickerTitle}>Pasirinkite automobilį</h2>
-        <div style={styles.pickerActions}>
+      <div style={layout.picker}>
+        <div style={layout.pickerHeader}>
+          <div>
+            <h2 style={layout.pickerTitle}>Pasirinkite automobilį</h2>
+            <p style={layout.subtitle}>
+              2 žingsnis iš 2 · {selectedCustomer.name}
+            </p>
+          </div>
+          <div style={styles.pickerActions}>
           <button
             type="button"
             className="app-btn app-btn-secondary"
@@ -206,6 +220,7 @@ export default function orders({ children }) {
           >
             Atšaukti
           </button>
+          </div>
         </div>
         <div style={layout.list}>
           {customerCars.length === 0 ? (
@@ -262,93 +277,69 @@ export default function orders({ children }) {
       return data[0].id;
     }
   };
+  const countFor = (value) =>
+    value === "All"
+      ? orders.length
+      : orders.filter((order) => order.status === value).length;
+
   return (
-    <div style={layout.page}>
-      <div style={layout.header}>
-        <div style={{ flex: 1 }}>
-          <h1 style={text.pageTitle}>Užsakymai</h1>
-          <p style={styles.subtitle}>
-            {orders.length} {orders.length === 1 ? "užsakymas" : "užsakymai"}
-          </p>
-
-          <div style={styles.searchContainer}>
-            <div style={styles.searchWrapper}>
-              <CustomButton
-                ButtonText="Sukurti užsakymą"
-                onClick={() => setShowOrderForm(true)}
-              />
-              <input
-                className="app-input"
-                style={styles.searchInput}
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Ieškoti pagal vardą arba automobilį"
-                aria-label="Ieškoti užsakymų"
-              />
-              {search && (
-                <button
-                  type="button"
-                  className="app-icon-btn"
-                  onClick={() => setSearch("")}
-                  aria-label="Išvalyti paiešką"
-                >
-                  &times;
-                </button>
-              )}
+    <div className="app-page" style={layout.page}>
+      {!showOrderForm && (
+        <>
+          <div style={layout.header}>
+            <div>
+              <h1 style={text.pageTitle}>Užsakymai</h1>
+              <p style={layout.subtitle}>
+                {query || status !== "All"
+                  ? `Rodoma ${filteredOrders.length} iš ${orders.length}`
+                  : `${orders.length} ${orders.length === 1 ? "užsakymas" : "užsakymai"}`}
+              </p>
             </div>
+            <CustomButton
+              ButtonText="+ Sukurti užsakymą"
+              onClick={() => setShowOrderForm(true)}
+            />
+          </div>
 
-            <div style={styles.searchStatusWrapper}>
-              <div
-                onClick={() => setStatus("Active")}
-                style={{
-                  ...styles.statusBadge,
-                  ...getStatusStyle("Active"),
-                  ...styles.statusFilter,
-                }}
-              >
-                {"Vykdomas"}
-              </div>
-              <div
-                style={{
-                  ...styles.statusBadge,
-                  ...getStatusStyle("Waiting for parts"),
-                  ...styles.statusFilter,
-                }}
-                onClick={() => setStatus("Waiting for parts")}
-              >
-                {"Laukia dalių"}
-              </div>
-              <div
-                style={{
-                  ...styles.statusBadge,
-                  ...getStatusStyle("Finished"),
-                  ...styles.statusFilter,
-                }}
-                onClick={() => setStatus("Finished")}
-              >
-                {"Baigtas"}
-              </div>
-              <div
-                style={{
-                  ...styles.statusBadge,
-                  ...getStatusStyle("All"),
-                  ...styles.statusFilter,
-                }}
-                onClick={() => setStatus("All")}
-              >
-                {"Visi"}
-              </div>
+          <div style={layout.toolbar}>
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder="Ieškoti pagal vardą arba automobilį"
+              label="Ieškoti užsakymų"
+            />
+            <div style={styles.chips} role="group" aria-label="Filtruoti pagal statusą">
+              {STATUS_FILTERS.map((filter) => (
+                <button
+                  key={filter.value}
+                  type="button"
+                  className={`app-chip${status === filter.value ? " is-active" : ""}`}
+                  aria-pressed={status === filter.value}
+                  onClick={() => setStatus(filter.value)}
+                >
+                  {filter.value !== "All" && (
+                    <span
+                      className="app-chip-dot"
+                      style={{ backgroundColor: getStatusStyle(filter.value).color }}
+                    />
+                  )}
+                  {filter.label}
+                  <span className="app-chip-count">{countFor(filter.value)}</span>
+                </button>
+              ))}
             </div>
           </div>
-        </div>
-        <Dropdown />
-      </div>
+        </>
+      )}
 
       <div style={layout.content}>
         {!showOrderForm &&
           (filteredOrders.length === 0 ? (
-            <p style={layout.emptyState}>Užsakymų dar nėra</p>
+            <p style={layout.emptyState}>
+              {orders.length === 0
+                ? "Užsakymų dar nėra"
+                : "Pagal pasirinktus filtrus užsakymų nerasta"}
+            </p>
           ) : (
             filteredOrders.map((order) => (
               <OrderCard
@@ -378,57 +369,10 @@ export default function orders({ children }) {
 }
 
 const styles = {
-  subtitle: {
-    ...text.muted,
-    margin: "4px 0 0",
-  },
-  statusBadge: {
-    padding: "5px 12px",
-    borderRadius: radius.pill,
-    fontSize: "0.8rem",
-    fontWeight: 600,
-    whiteSpace: "nowrap",
-  },
-  statusFilter: {
+  chips: {
     display: "flex",
-    flex: "1",
-    border: `2px solid ${colors.border}`,
-    marginLeft: "2%",
-    justifyContent: "center",
-    alignItems: "center",
-    textAlign: "center",
-    cursor: "pointer",
-  },
-  searchStatusWrapper: {
-    display: "flex",
-    flex: 1,
-    justifyContent: "space-between",
-  },
-  searchWrapper: {
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-    flex: "1 1 260px",
-    maxWidth: "450px",
-  },
-  searchContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  searchInput: {
-    marginLeft: "10px",
-  },
-  picker: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "16px",
-    width: "100%",
-    maxWidth: "80%",
-  },
-  pickerTitle: {
-    ...text.pageTitle,
-    fontSize: "1.35rem",
+    flexWrap: "wrap",
+    gap: "8px",
   },
   pickerActions: {
     display: "flex",

@@ -1,20 +1,6 @@
 import PropTypes from "prop-types";
 import { colors, radius, shadow, space } from "../../theme";
-
-const STATUS_COLORS = {
-  Active: { color: colors.warning, backgroundColor: colors.warningSoft },
-  Finished: { color: colors.success, backgroundColor: colors.successSoft },
-  "Waiting for parts": {
-    color: colors.danger,
-    backgroundColor: colors.dangerSoft,
-  },
-};
-
-const getStatusStyle = (status) =>
-  STATUS_COLORS[status] ?? {
-    color: colors.accent,
-    backgroundColor: colors.accentSoft,
-  };
+import { getStatusLabel, getStatusStyle } from "../StatusDropdown";
 
 const formatDate = (dateString) => {
   if (!dateString) return "";
@@ -42,25 +28,14 @@ const OrderCard = ({
   onClick,
   onDelete,
 }) => {
-  const returnStatusText = (status) => {
-    switch (status) {
-      case "Active":
-        return "Vykdomas";
-      case "Finished":
-        return "Baigtas";
-      case "Waiting for parts":
-        return "Laukia dalių";
-      default:
-        return "Nenurodyta";
-    }
-  };
+  const statusStyle = getStatusStyle(status);
 
   return (
     <div
       onClick={onClick}
       data-id={id}
-      className={`app-card${onClick ? " app-card-interactive" : ""}`}
-      style={styles.root}
+      className={`app-card app-status-stripe${onClick ? " app-card-interactive" : ""}`}
+      style={{ ...styles.root, "--status-color": statusStyle.color }}
     >
       <div style={styles.identity}>
         <span style={styles.orderId}>#{id}</span>
@@ -92,8 +67,11 @@ const OrderCard = ({
       </div>
 
       <div style={styles.actions}>
-        <span style={{ ...styles.statusBadge, ...getStatusStyle(status) }}>
-          {returnStatusText(status)}
+        <span style={{ ...styles.statusBadge, ...statusStyle }}>
+          <span
+            style={{ ...styles.statusDot, backgroundColor: statusStyle.color }}
+          />
+          {getStatusLabel(status)}
         </span>
         {onDelete && (
           <button
@@ -121,7 +99,7 @@ const styles = {
     alignItems: "center",
     gap: space.lg,
     width: "100%",
-    padding: `${space.lg} ${space.xl}`,
+    padding: `${space.lg} ${space.xl} ${space.lg} 28px`,
     backgroundColor: colors.surface,
     border: `1px solid ${colors.border}`,
     borderRadius: radius.lg,
@@ -167,6 +145,7 @@ const styles = {
   },
   figures: {
     display: "flex",
+    flexWrap: "wrap",
     gap: space.xl,
     flex: "1 1 180px",
   },
@@ -194,7 +173,16 @@ const styles = {
     gap: space.sm,
     marginLeft: "auto",
   },
+  statusDot: {
+    width: "7px",
+    height: "7px",
+    borderRadius: "50%",
+    flexShrink: 0,
+  },
   statusBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
     padding: "5px 12px",
     borderRadius: radius.pill,
     fontSize: "0.8rem",

@@ -57,12 +57,12 @@ export const text = {
     margin: 0,
   },
   sectionTitle: {
-    fontSize: "1rem",
     fontWeight: 600,
     textTransform: "uppercase",
     letterSpacing: "0.06em",
     color: colors.textMuted,
     margin: 0,
+    fontSize: "0.8rem",
   },
   label: {
     fontSize: "0.8rem",
@@ -85,7 +85,44 @@ export const layout = {
     gap: space.xl,
     width: "100%",
     maxWidth: "1100px",
+    margin: "0 auto",
     padding: `${space.xxl} ${space.xl} ${space.xxl}`,
+  },
+  // Page heading block: title plus a muted line underneath.
+  subtitle: {
+    fontSize: "0.9rem",
+    color: colors.textMuted,
+    margin: "4px 0 0",
+  },
+  toolbar: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: space.md,
+    width: "100%",
+  },
+  // Customer / car picker used by the "new order" and "new car" flows.
+  picker: {
+    display: "flex",
+    flexDirection: "column",
+    gap: space.lg,
+    width: "100%",
+    maxWidth: "720px",
+    margin: "0 auto",
+  },
+  pickerHeader: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: space.md,
+  },
+  pickerTitle: {
+    fontSize: "1.35rem",
+    fontWeight: 700,
+    letterSpacing: "-0.02em",
+    color: colors.text,
+    margin: 0,
   },
   header: {
     display: "flex",
@@ -93,6 +130,15 @@ export const layout = {
     gap: space.lg,
     alignItems: "center",
     justifyContent: "space-between",
+  },
+  // Vertical stack of cards.
+  list: {
+    display: "flex",
+    flexDirection: "column",
+    gap: space.sm,
+    width: "100%",
+    margin: 0,
+    padding: 0,
   },
   content: {
     display: "flex",

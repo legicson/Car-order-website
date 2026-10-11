@@ -1,13 +1,12 @@
 "use client";
 
-import Dropdown from "./components/UI/Dropdown";
 import { useState, useEffect } from "react";
 import AddButtonsRow from "./components/UI/AddButtonsRow";
 import { supabase } from "./supabaseClient"; // Importuojame klientą
 import Card from "./components/cards/Card";
 import { useRouter } from "next/navigation";
 import CarAddForm from "./components/forms/CarAddForm";
-import { layout, text } from "./theme";
+import { colors, layout, text } from "./theme";
 import NewPartFlow from "./components/forms/NewPartFlow";
 import NewCustomerFlow from "./components/forms/NewCustomerFlow";
 import OrderCard from "./components/cards/OrderCard";
@@ -192,13 +191,16 @@ export default function Home() {
 
   const returnSelectableCustomerList = () => {
     return (
-      <div style={style.picker}>
-        <h2 style={style.pickerTitle}>
-          {showOrderForm
-            ? "Pasirinkite klientą naujam užsakymui"
-            : "Pasirinkite klientą, kuriam norite pridėti automobilį"}
-        </h2>
-        <div style={style.pickerActions}>
+      <div style={layout.picker}>
+        <div style={layout.pickerHeader}>
+          <div>
+            <h2 style={layout.pickerTitle}>
+              {showOrderForm
+                ? "Pasirinkite klientą naujam užsakymui"
+                : "Pasirinkite klientą, kuriam norite pridėti automobilį"}
+            </h2>
+            <p style={layout.subtitle}>1 žingsnis iš 2</p>
+          </div>
           <button
             type="button"
             className="app-btn app-btn-secondary"
@@ -243,8 +245,13 @@ export default function Home() {
       (car) => car.user_id === selectedCustomer.id,
     );
     return (
-      <div style={style.picker}>
-        <h2 style={style.pickerTitle}>Pasirinkite automobilį</h2>
+      <div style={layout.picker}>
+        <div>
+          <h2 style={layout.pickerTitle}>Pasirinkite automobilį</h2>
+          <p style={layout.subtitle}>
+            2 žingsnis iš 2 · {selectedCustomer.name}
+          </p>
+        </div>
 
         <div style={layout.list}>
           {customerCars.length === 0 ? (
@@ -266,7 +273,7 @@ export default function Home() {
           )}
         </div>
 
-        <div style={style.pickerActions}>
+        <div style={layout.toolbar}>
           <button
             type="button"
             className="app-btn app-btn-secondary"
@@ -337,31 +344,53 @@ export default function Home() {
       );
   };
 
+  const countByStatus = (status) =>
+    orders.filter((order) => order.status === status).length;
+
+  const activeOrders = orders.filter((order) =>
+    ["Active", "Waiting for parts"].includes(order.status),
+  );
+
   return (
-    <div style={layout.page}>
+    <div className="app-page" style={layout.page}>
       {!showOrderForm && !showCustomerForm && !showCarForm && !showPartForm && (
         <>
           <div style={layout.header}>
             <div>
               <h1 style={text.pageTitle}>Pagrindinis puslapis</h1>
-              <p style={style.subtitle}>
+              <p style={layout.subtitle}>
                 Sukurkite užsakymą arba papildykite serviso duomenis
               </p>
             </div>
-            <Dropdown />
           </div>
 
-          <div style={style.selectionRow}>
-            <AddButtonsRow
-              setAddCustomerModalOpen={setShowCustomerForm}
-              setAddOrderModalOpen={setShowOrderForm}
-              setAddCarModalOpen={setShowCarForm}
-              setAddPartModalOpen={setShowPartForm}
-            />
-            <p style={style.totalProfit}>
-              Viso pelnas: {formatPrice(calculateOrderTotalProfit())}
-            </p>
+          <div className="app-stats">
+            <div className="app-stat" style={{ "--stat-accent": colors.warning }}>
+              <span className="app-stat-label">Vykdomi užsakymai</span>
+              <span className="app-stat-value">{countByStatus("Active")}</span>
+            </div>
+            <div className="app-stat" style={{ "--stat-accent": colors.danger }}>
+              <span className="app-stat-label">Laukia dalių</span>
+              <span className="app-stat-value">
+                {countByStatus("Waiting for parts")}
+              </span>
+            </div>
+            <div className="app-stat" style={{ "--stat-accent": colors.success }}>
+              <span className="app-stat-label">Viso pelnas</span>
+              <span className="app-stat-value">
+                {formatPrice(calculateOrderTotalProfit())}
+              </span>
+            </div>
           </div>
+
+          <AddButtonsRow
+            setAddCustomerModalOpen={setShowCustomerForm}
+            setAddOrderModalOpen={setShowOrderForm}
+            setAddCarModalOpen={setShowCarForm}
+            setAddPartModalOpen={setShowPartForm}
+          />
+
+          <h2 style={style.sectionTitle}>Aktyvūs užsakymai</h2>
         </>
       )}
 
@@ -370,14 +399,12 @@ export default function Home() {
           !showCustomerForm &&
           !showCarForm &&
           !showPartForm &&
-          (orders.length === 0 ? (
-            <p>Užsakymų dar nėra</p>
+          (activeOrders.length === 0 ? (
+            <p style={{ ...layout.emptyState, width: "100%" }}>
+              Aktyvių užsakymų nėra
+            </p>
           ) : (
-            orders
-              .filter((order) =>
-                ["Active", "Waiting for parts"].includes(order.status),
-              )
-              .map((order) => (
+            activeOrders.map((order) => (
                 <OrderCard
                   key={order.id}
                   id={order.id}
@@ -442,41 +469,14 @@ export default function Home() {
 }
 
 const style = {
-  subtitle: {
-    ...text.muted,
-    margin: "4px 0 0",
-  },
   content: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     width: "100%",
   },
-  picker: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "16px",
-    width: "100%",
-    maxWidth: "80%",
-  },
-  pickerTitle: {
-    ...text.pageTitle,
-    fontSize: "1.35rem",
-  },
-  pickerActions: {
-    display: "flex",
-    gap: "8px",
-  },
-  selectionRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    margin: "16px 0",
-  },
-  totalProfit:{
-    ...text.label,
-    fontSize: "1.2rem",
-    fontWeight: "bold",
-    margin: "16px 0",
+  sectionTitle: {
+    ...text.sectionTitle,
+    marginTop: "8px",
   },
 };

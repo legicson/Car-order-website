@@ -16,7 +16,9 @@ const PartsCard = ({ id, onClick, header, details, price, onDelete }) => {
         </div>
       </div>
 
-      <p style={styles.price}>{price}</p>
+      <div style={styles.price}>
+        {typeof price === "number" ? `${price.toFixed(2)} €` : price}
+      </div>
 
       {onDelete && (
         <button
@@ -47,7 +49,6 @@ const styles = {
     border: `1px solid ${colors.border}`,
     borderRadius: radius.lg,
     boxShadow: shadow.sm,
-    marginBottom: space.md,
   },
   info: {
     display: "flex",

@@ -12,25 +12,25 @@ function AddButtonsRow({
         className="app-btn app-btn-primary"
         onClick={() => setAddOrderModalOpen(true)}
       >
-        Sukurti užsakymą
+        <span aria-hidden="true">+</span> Sukurti užsakymą
       </button>
       <button
         className="app-btn app-btn-secondary"
         onClick={() => setAddCustomerModalOpen(true)}
       >
-        Pridėti klientą
+        <span aria-hidden="true">+</span> Pridėti klientą
       </button>
       <button
         className="app-btn app-btn-secondary"
         onClick={() => setAddCarModalOpen(true)}
       >
-        Pridėti automobilį
+        <span aria-hidden="true">+</span> Pridėti automobilį
       </button>
       <button
         className="app-btn app-btn-secondary"
         onClick={() => setAddPartModalOpen(true)}
       >
-        Pridėti dalį
+        <span aria-hidden="true">+</span> Pridėti dalį
       </button>
     </div>
   );

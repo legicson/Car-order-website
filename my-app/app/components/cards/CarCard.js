@@ -23,7 +23,7 @@ const CarCard = ({
     <div
       onClick={onClick}
       data-id={id}
-      className={`app-card${onClick ? " app-card-interactive" : ""}`}
+      className={`app-card${onClickDelete ? " app-card-corner" : ""}${onClick ? " app-card-interactive" : ""}`}
       style={styles.root}
     >
       <div style={styles.identity}>
@@ -34,22 +34,22 @@ const CarCard = ({
       </div>
 
       <div style={styles.details}>
-        <Detail label="Numeris" value={registrationNumber} />
+        <div style={styles.detail}>
+          <span style={styles.detailLabel}>Numeris</span>
+          {registrationNumber ? (
+            <span style={styles.plate}>{registrationNumber}</span>
+          ) : (
+            <span style={styles.detailValue}>-</span>
+          )}
+        </div>
         <Detail label="Metai" value={year} />
         <Detail label="VIN" value={vin} />
       </div>
 
-      {comment && (
-        <div style={styles.comment}>
-          <span style={styles.detailLabel}>Komentaras</span>
-          <span style={styles.commentValue}>{comment}</span>
-        </div>
-      )}
-
       {onClickDelete && (
         <button
           type="button"
-          className="app-icon-btn"
+          className="app-icon-btn app-card-delete"
           aria-label="Pašalinti automobilį"
           onClick={(event) => {
             event.stopPropagation();
@@ -58,6 +58,13 @@ const CarCard = ({
         >
           &times;
         </button>
+      )}
+
+      {comment && (
+        <div style={styles.comment}>
+          <span style={styles.detailLabel}>Komentaras</span>
+          <span style={styles.commentValue}>{comment}</span>
+        </div>
       )}
     </div>
   );
@@ -118,6 +125,19 @@ const styles = {
     fontWeight: 500,
     color: colors.text,
     overflowWrap: "anywhere",
+  },
+  plate: {
+    alignSelf: "flex-start",
+    padding: "2px 8px",
+    border: `1.5px solid ${colors.text}`,
+    borderRadius: "4px",
+    backgroundColor: colors.surface,
+    fontFamily: "var(--font-geist-mono), monospace",
+    fontSize: "0.85rem",
+    fontWeight: 700,
+    letterSpacing: "0.06em",
+    textTransform: "uppercase",
+    color: colors.text,
   },
   comment: {
     display: "flex",

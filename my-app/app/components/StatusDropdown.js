@@ -27,6 +27,17 @@ export const getStatusStyle = (status) =>
 export const getStatusLabel = (status) =>
   STATUSES.find((item) => item.value === status)?.label ?? "Nenurodyta";
 
+// Whole-surface fill: status text colour on its soft background, with a
+// border in the text colour at low opacity so the edge stays visible.
+const statusFill = (status) => {
+  const { color, backgroundColor } = getStatusStyle(status);
+  return {
+    color,
+    backgroundColor,
+    borderColor: `color-mix(in srgb, ${color} 30%, transparent)`,
+  };
+};
+
 export default function StatusDropdown({
   status,
   setStatus,
@@ -44,31 +55,37 @@ export default function StatusDropdown({
   return (
     <Dropdown onSelect={handleSelect} align="end">
       <Dropdown.Toggle
-        style={style.mainButton}
+        className="status-toggle"
+        style={{
+          ...style.mainButton,
+          ...(selected ? statusFill(selected.value) : {}),
+        }}
         id="status-dropdown"
         disabled={disabled}
       >
         {selected ? (
-          <span style={{ ...style.badge, ...getStatusStyle(selected.value) }}>
-            {selected.label}
-          </span>
+          selected.label
         ) : (
           <span style={style.placeholder}>{placeholder}</span>
         )}
       </Dropdown.Toggle>
 
-      <Dropdown.Menu>
-        {STATUSES.map((item) => (
-          <Dropdown.Item
-            key={item.value}
-            eventKey={item.value}
-            active={item.value === status}
-          >
-            <span style={{ ...style.badge, ...getStatusStyle(item.value) }}>
-              {item.label}
-            </span>
-          </Dropdown.Item>
-        ))}
+      <Dropdown.Menu className="status-menu">
+        {STATUSES.map((item) => {
+          const isSelected = item.value === status;
+          return (
+            <Dropdown.Item
+              key={item.value}
+              eventKey={item.value}
+              active={isSelected}
+              className="status-item"
+              style={{ ...style.item, ...statusFill(item.value) }}
+            >
+              <span>{item.label}</span>
+              {isSelected && <span aria-hidden="true">✓</span>}
+            </Dropdown.Item>
+          );
+        })}
       </Dropdown.Menu>
     </Dropdown>
   );
@@ -88,12 +105,13 @@ const style = {
     fontWeight: 600,
     padding: "9px 18px",
   },
-  badge: {
-    padding: "5px 12px",
-    borderRadius: radius.pill,
-    fontSize: "0.8rem",
+  item: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: space.md,
+    border: "1px solid transparent",
     fontWeight: 600,
-    whiteSpace: "nowrap",
   },
   placeholder: {
     color: colors.textMuted,

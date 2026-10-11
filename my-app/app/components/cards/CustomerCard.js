@@ -15,6 +15,15 @@ const carCountLabel = (count) => {
   return `${count} automobiliai`;
 };
 
+// First letters of the first two words, e.g. "Jonas Jonaitis" -> "JJ".
+const initials = (value) =>
+  String(value ?? "")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase() ?? "")
+    .join("") || "?";
+
 const CustomerCard = ({
   id,
   customerName,
@@ -46,12 +55,17 @@ const CustomerCard = ({
     <div
       onClick={onClick}
       data-id={id}
-      className={`app-card${onClick ? " app-card-interactive" : ""}`}
+      className={`app-card${onClickDelete ? " app-card-corner" : ""}${onClick ? " app-card-interactive" : ""}`}
       style={styles.root}
     >
-      <div style={styles.identity}>
-        <h2 style={styles.header}>{customerName || "Nežinomas klientas"}</h2>
-        <span style={styles.subText}>{phoneNumber || "Nenurodytas"}</span>
+      <div style={styles.identityRow}>
+        <div style={styles.avatar} aria-hidden="true">
+          {initials(customerName)}
+        </div>
+        <div style={styles.identity}>
+          <h2 style={styles.header}>{customerName || "Nežinomas klientas"}</h2>
+          <span style={styles.subText}>{phoneNumber || "Telefonas nenurodytas"}</span>
+        </div>
       </div>
 
       <div style={styles.cars}>{renderCars()}</div>
@@ -59,7 +73,7 @@ const CustomerCard = ({
       {onClickDelete && (
         <button
           type="button"
-          className="app-icon-btn"
+          className="app-icon-btn app-card-delete"
           aria-label="Pašalinti klientą"
           onClick={(event) => {
             event.stopPropagation();
@@ -87,12 +101,31 @@ const styles = {
     borderRadius: radius.lg,
     boxShadow: shadow.sm,
   },
+  identityRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: space.md,
+    flex: "1 1 220px",
+    minWidth: 0,
+  },
   identity: {
     display: "flex",
     flexDirection: "column",
     gap: "2px",
-    flex: "1 1 180px",
     minWidth: 0,
+  },
+  avatar: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "42px",
+    height: "42px",
+    flexShrink: 0,
+    borderRadius: radius.md,
+    background: "linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%)",
+    color: colors.accent,
+    fontSize: "0.9rem",
+    fontWeight: 700,
   },
   header: {
     margin: 0,
