@@ -295,6 +295,8 @@ export default function Home() {
     router.push(`/screens/orders/${orderId}?origin=main`);
   };
   const toAmount = (value) => Number(value) || 0;
+  const formatPrice = (value) => `${toAmount(value).toFixed(2)} €`;
+
   const calculateOrderTotalPrice = (order) => {
     return order.order_items.reduce(
       (sum, item) => sum + item.quantity * toAmount(item.price_at_sale),
@@ -309,7 +311,18 @@ export default function Home() {
       0,
     );
 
-    return total + (order.labor_items || []).reduce((sum, item) => sum + toAmount(item.price), 0);
+    const laborFromItems = (order.labor_items || []).reduce(
+      (sum, item) => sum + toAmount(item.price),
+      0,
+    );
+
+    // If order has labor_items, sum them; otherwise fall back to legacy order.labor
+    const labor =
+      order.labor_items && order.labor_items.length > 0
+        ? laborFromItems
+        : toAmount(order.labor);
+
+    return total + labor;
   };
 
   const calculateOrderTotalProfit = () => {
@@ -345,7 +358,9 @@ export default function Home() {
               setAddCarModalOpen={setShowCarForm}
               setAddPartModalOpen={setShowPartForm}
             />
-            <p style={style.totalProfit}>Viso pelnas: {calculateOrderTotalProfit()}</p>
+            <p style={style.totalProfit}>
+              Viso pelnas: {formatPrice(calculateOrderTotalProfit())}
+            </p>
           </div>
         </>
       )}

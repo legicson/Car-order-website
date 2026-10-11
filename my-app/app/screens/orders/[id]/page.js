@@ -44,8 +44,12 @@ export default function orderList({ params, searchParams }) {
   const [status, setStatus] = useState(null);
 
   const [addedParts, setAddedParts] = useState([]);
+  const [legacyLabor, setLegacyLabor] = useState(0);
 
-  const totalLabor = laborItems.reduce((sum, item) => sum + toAmount(item.price), 0);
+  const totalLabor =
+    laborItems.length > 0
+      ? laborItems.reduce((sum, item) => sum + toAmount(item.price), 0)
+      : legacyLabor;
 
   useEffect(() => {
     fetchOrderDetails();
@@ -198,6 +202,7 @@ export default function orderList({ params, searchParams }) {
     created_at,
     status,
     mileage,
+    labor,
     car:cars (
       id,
       car_name,
@@ -222,6 +227,7 @@ export default function orderList({ params, searchParams }) {
       setCustomer(data.car.customer);
       console.log(data.mileage);
       setMileage(data.mileage);
+      setLegacyLabor(toAmount(data.labor));
       setStatus(data.status);
     }
   };
@@ -481,6 +487,14 @@ export default function orderList({ params, searchParams }) {
 
         <div style={styles.laborSection}>
           <h3 style={text.label}>Darbai</h3>
+          {laborItems.length === 0 && legacyLabor > 0 && (
+            <div style={styles.laborList}>
+              <div style={styles.laborItem}>
+                <span style={styles.laborName}>Darbai (ankstesnis įrašas)</span>
+                <span style={styles.laborPrice}>{formatPrice(legacyLabor)}</span>
+              </div>
+            </div>
+          )}
           {laborItems.length > 0 && (
             <div style={styles.laborList}>
               {laborItems.map((item) => (
