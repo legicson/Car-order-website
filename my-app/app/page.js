@@ -405,14 +405,11 @@ export default function Home() {
                   customerName={order.cars.customers.name}
                   carName={order.cars.car_name}
                   createdAt={order.created_at}
-                  costOfGoods={order.cost_of_goods}
-                  income={order.income}
                   status={order.status}
                   onClick={() => onClickSetSelectedOrder(order.id)}
                   onDelete={() => {}}
                   totalPrice={calculateOrderTotalPrice(order)}
                   totalRevenue={calculateOrderTotalIncome(order)}
-                  mileage={order.mileage}
                 />
               ))
           ))}

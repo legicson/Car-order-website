@@ -247,23 +247,8 @@ export default function orderList({ params, searchParams }) {
     setShowOrderDetailsSection(false);
   };
 
-  const saveCostAndIncome = async () => {
-    // e.preventDefault();
-
-    const { error } = await supabase
-      .from("orders")
-      .update({
-        cost_of_goods: toAmount(totalPrice),
-        income: toAmount(totalRetailPrice) + totalLabor,
-      })
-      .eq("id", id);
-
-    if (error) {
-      console.error("Klaida išsaugant užsakymo duomenis:", error.message);
-      return;
-    }
-  };
-
+  // Saved as soon as it is picked, so the change survives leaving the page by
+  // any route (top navigation, back button, reload), not only via the button.
   const saveStatus = async (newStatus) => {
     const { error } = await supabase
       .from("orders")
@@ -451,15 +436,9 @@ export default function orderList({ params, searchParams }) {
       alert("Prašome įvesti ridą");
       return;
     }
-    saveStatus(status);
-    saveCostAndIncome();
-    if (origin === "main") {
-      router.push("/");
-
-      return;
-    } else {
-      router.push("/screens/orders");
-    }
+    // Status, parts and labor are all saved as they change, so this button
+    // only navigates back to where the user came from.
+    router.push(origin === "main" ? "/" : "/screens/orders");
   };
 
   return (
@@ -480,7 +459,7 @@ export default function orderList({ params, searchParams }) {
               Įvesti rida
             </button>
 
-            <StatusDropdown status={status} setStatus={setStatus} />
+            <StatusDropdown status={status} setStatus={saveStatus} />
 
             <button
               className="app-btn app-btn-primary"

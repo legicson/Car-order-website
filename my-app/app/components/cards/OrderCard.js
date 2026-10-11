@@ -15,15 +15,16 @@ const formatMoney = (value) => {
   return Number.isNaN(number) ? value : `${number.toFixed(2)} €`;
 };
 
+// totalPrice (cost of parts) and totalRevenue (parts at retail plus labor) are
+// calculated by the caller from the order's order_items and labor_items, so the
+// card always reflects the current contents of the order.
 const OrderCard = ({
-  costOfGoods,
   id,
   customerName,
   carName,
   createdAt,
   totalPrice,
   totalRevenue,
-  income,
   status,
   onClick,
   onDelete,
@@ -51,17 +52,17 @@ const OrderCard = ({
       <div style={styles.figures}>
         <div style={styles.figure}>
           <span style={styles.figureLabel}>Savikaina</span>
-          <span style={styles.figureValue}>{formatMoney(costOfGoods)}</span>
+          <span style={styles.figureValue}>{formatMoney(totalPrice)}</span>
         </div>
 
         <div style={styles.figure}>
           <span style={styles.figureLabel}>Pajamos</span>
-          <span style={styles.figureValue}>{formatMoney(income)}</span>
+          <span style={styles.figureValue}>{formatMoney(totalRevenue)}</span>
         </div>
         <div style={styles.figure}>
           <span style={styles.figureLabel}>Pelnas</span>
           <span style={styles.figureValue}>
-            {formatMoney(Number(income) - Number(costOfGoods))}
+            {formatMoney(totalRevenue - totalPrice)}
           </span>
         </div>
       </div>
@@ -196,8 +197,8 @@ OrderCard.propTypes = {
   customerName: PropTypes.string,
   carName: PropTypes.string,
   createdAt: PropTypes.string,
-  totalPrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  income: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  totalPrice: PropTypes.number,
+  totalRevenue: PropTypes.number,
   status: PropTypes.string,
   onClick: PropTypes.func,
   onDelete: PropTypes.func,
