@@ -459,7 +459,7 @@ export default function orderList({ params, searchParams }) {
               className="app-btn app-btn-primary"
               onClick={returnToOrders}
             >
-              Išsaugoti ir grįžti
+              Grįžti
             </button>
           </div>
         </div>
