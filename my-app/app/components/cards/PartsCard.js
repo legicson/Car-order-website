@@ -43,6 +43,7 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     gap: space.lg,
+    minHeight: "7vh",  
     width: "100%",
     padding: `${space.md} ${space.lg}`,
     backgroundColor: colors.surface,

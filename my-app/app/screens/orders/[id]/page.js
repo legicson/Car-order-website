@@ -44,12 +44,11 @@ export default function orderList({ params, searchParams }) {
   const [status, setStatus] = useState(null);
 
   const [addedParts, setAddedParts] = useState([]);
-  const [legacyLabor, setLegacyLabor] = useState(0);
 
-  const totalLabor =
-    laborItems.length > 0
-      ? laborItems.reduce((sum, item) => sum + toAmount(item.price), 0)
-      : legacyLabor;
+  const totalLabor = laborItems.reduce(
+    (sum, item) => sum + toAmount(item.price),
+    0,
+  );
 
   useEffect(() => {
     fetchOrderDetails();
@@ -202,7 +201,6 @@ export default function orderList({ params, searchParams }) {
     created_at,
     status,
     mileage,
-    labor,
     car:cars (
       id,
       car_name,
@@ -227,7 +225,6 @@ export default function orderList({ params, searchParams }) {
       setCustomer(data.car.customer);
       console.log(data.mileage);
       setMileage(data.mileage);
-      setLegacyLabor(toAmount(data.labor));
       setStatus(data.status);
     }
   };
@@ -439,6 +436,16 @@ export default function orderList({ params, searchParams }) {
     ));
   };
 
+  const showLaborItems = () =>
+    laborItems.map((item) => (
+      <PartsCard
+        key={item.id}
+        header={item.name}
+        price={formatPrice(item.price)}
+        onDelete={() => deleteLaborItem(item.id)}
+      />
+    ));
+
   const returnToOrders = () => {
     if (mileage === "") {
       alert("Prašome įvesti ridą");
@@ -470,7 +477,7 @@ export default function orderList({ params, searchParams }) {
                 setShowOrderDetailsSection(!showOrderDetailsSection)
               }
             >
-              Rida ir darbai
+              Įvesti rida
             </button>
 
             <StatusDropdown status={status} setStatus={setStatus} />
@@ -488,62 +495,6 @@ export default function orderList({ params, searchParams }) {
 
         {showOrderDetailsSection && returnOrderDetailsSection()}
 
-        <div style={styles.laborSection}>
-          <h3 style={text.sectionTitle}>Darbai</h3>
-          {laborItems.length === 0 && legacyLabor > 0 && (
-            <div style={styles.laborList}>
-              <div style={styles.laborItem}>
-                <span style={styles.laborName}>Darbai (ankstesnis įrašas)</span>
-                <span style={styles.laborPrice}>{formatPrice(legacyLabor)}</span>
-              </div>
-            </div>
-          )}
-          {laborItems.length > 0 && (
-            <div style={styles.laborList}>
-              {laborItems.map((item) => (
-                <div key={item.id} style={styles.laborItem}>
-                  <span style={styles.laborName}>{item.name}</span>
-                  <span style={styles.laborPrice}>{formatPrice(item.price)}</span>
-                  <button
-                    type="button"
-                    className="app-icon-btn"
-                    onClick={() => deleteLaborItem(item.id)}
-                    aria-label="Pašalinti darbą"
-                  >
-                    &times;
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-          <form style={styles.laborAddForm} onSubmit={addLaborItem}>
-            <input
-              className="app-input"
-              style={{ flex: "2 1 180px" }}
-              type="text"
-              value={laborName}
-              onChange={(e) => setLaborName(e.target.value)}
-              placeholder="Darbo pavadinimas"
-              required
-            />
-            <input
-              className="app-input"
-              style={{ flex: "1 1 100px", maxWidth: "140px" }}
-              type="number"
-              min="0"
-              step="0.01"
-              inputMode="decimal"
-              value={laborPrice}
-              onChange={(e) => setLaborPrice(e.target.value)}
-              placeholder="Kaina €"
-              required
-            />
-            <button type="submit" className="app-btn app-btn-primary">
-              Pridėti
-            </button>
-          </form>
-        </div>
-
         <div style={styles.totals}>
           <div style={styles.totalRow}>
             <span style={styles.totalLabelMuted}>Dalių savikaina</span>
@@ -559,7 +510,9 @@ export default function orderList({ params, searchParams }) {
           </div>
           <div style={styles.totalRow}>
             <span style={styles.totalLabelMuted}>Darbai</span>
-            <span style={styles.totalValueMuted}>{formatPrice(totalLabor)}</span>
+            <span style={styles.totalValueMuted}>
+              {formatPrice(totalLabor)}
+            </span>
           </div>
           <div style={{ ...styles.totalRow, ...styles.grandTotalRow }}>
             <span style={styles.totalLabel}>Bendra suma</span>
@@ -573,15 +526,45 @@ export default function orderList({ params, searchParams }) {
       <div style={styles.content}>
         <div style={styles.partsHeaderContainer}>
           {showAddedParts && (
-            <button
-              className="app-btn app-btn-secondary"
-              onClick={() => {
-                setShowPartAddingSection(!showPartAddingSection);
-                setShowAddedParts(!showAddedParts);
-              }}
-            >
-              Pridėti dalis
-            </button>
+            <div style={styles.partsLaborHeaderContainer}>
+   
+              <button
+                className="app-btn app-btn-secondary"
+                style={{ backgroundColor: "green", color: "white" }}
+                onClick={() => {
+                  setShowPartAddingSection(!showPartAddingSection);
+                  setShowAddedParts(!showAddedParts);
+                }}
+              >
+                Pridėti dalis
+              </button>
+                         <form style={styles.laborAddForm} onSubmit={addLaborItem}>
+                <input
+                  className="app-input"
+                  style={{ flex: "2 1 180px" }}
+                  type="text"
+                  value={laborName}
+                  onChange={(e) => setLaborName(e.target.value)}
+                  placeholder="Pridėkite darbą"
+                  required
+                />
+                <input
+                  className="app-input"
+                  style={{ flex: "1 1 100px", maxWidth: "140px" }}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={laborPrice}
+                  onChange={(e) => setLaborPrice(e.target.value)}
+                  placeholder="Kaina €"
+                  required
+                />
+                <button type="submit" className="app-btn app-btn-primary">
+                  Pridėti
+                </button>
+              </form>
+            </div>
           )}
           {showPartAddingSection && (
             <button className="app-btn app-btn-primary" onClick={addOrderItems}>
@@ -591,15 +574,30 @@ export default function orderList({ params, searchParams }) {
         </div>
         {showPartAddingSection && returnPartAddingSection()}
         {showAddedParts && (
-          <div style={styles.column}>
-            <h2 style={text.sectionTitle}>Užsakymo dalys</h2>
+          <div style={styles.orderLists}>
+        
 
-            <div style={layout.content}>
-              {orderItems.length === 0 ? (
-                <p style={layout.emptyState}>Dalių dar nepridėta</p>
-              ) : (
-                showOrderItems()
-              )}
+            <div style={styles.column}>
+              <h2 style={text.sectionTitle}>Užsakymo dalys</h2>
+
+              <div style={layout.content}>
+                {orderItems.length === 0 ? (
+                  <p style={layout.emptyState}>Dalių dar nepridėta</p>
+                ) : (
+                  showOrderItems()
+                )}
+              </div>
+            </div>
+                <div style={styles.column}>
+              <h2 style={text.sectionTitle}>Atlikti darbai</h2>
+
+              <div style={layout.content}>
+                {laborItems.length === 0 ? (
+                  <p style={layout.emptyState}>Darbų dar nepridėta</p>
+                ) : (
+                  showLaborItems()
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -657,7 +655,7 @@ const styles = {
     gap: space.sm,
     alignSelf: "flex-end",
     width: "100%",
-    maxWidth: "380px",
+    // maxWidth: "380px",
     padding: space.lg,
     backgroundColor: colors.surfaceAlt,
     border: `1px solid ${colors.border}`,
@@ -732,38 +730,13 @@ const styles = {
     paddingBottom: space.md,
     borderBottom: `1px solid ${colors.border}`,
   },
-  laborSection: {
-    display: "flex",
-    flexDirection: "column",
-    gap: space.sm,
-    paddingTop: space.lg,
-    borderTop: `1px solid ${colors.border}`,
-  },
-  laborList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: space.xs,
-  },
-  laborItem: {
-    display: "flex",
-    alignItems: "center",
-    gap: space.md,
-    padding: `${space.sm} ${space.md}`,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
-    border: `1px solid ${colors.border}`,
-  },
-  laborName: {
-    flex: 1,
-    fontSize: "0.9rem",
-    fontWeight: 500,
-    color: colors.text,
-  },
-  laborPrice: {
-    fontSize: "0.9rem",
-    fontWeight: 600,
-    fontVariantNumeric: "tabular-nums",
-    color: colors.text,
+  // Labor and parts lists side by side; stacks on narrow screens.
+  orderLists: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+    gap: space.xl,
+    width: "100%",
+    alignItems: "start",
   },
   laborAddForm: {
     display: "flex",
@@ -771,4 +744,11 @@ const styles = {
     alignItems: "center",
     gap: space.sm,
   },
+  partsLaborHeaderContainer:{
+    display: "flex",
+    flex:1,
+    flexDirection: "row",
+    gap: space.md,
+    justifyContent: "space-between",
+  }
 };

@@ -318,16 +318,10 @@ export default function Home() {
       0,
     );
 
-    const laborFromItems = (order.labor_items || []).reduce(
+    const labor = (order.labor_items || []).reduce(
       (sum, item) => sum + toAmount(item.price),
       0,
     );
-
-    // If order has labor_items, sum them; otherwise fall back to legacy order.labor
-    const labor =
-      order.labor_items && order.labor_items.length > 0
-        ? laborFromItems
-        : toAmount(order.labor);
 
     return total + labor;
   };
