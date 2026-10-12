@@ -47,9 +47,9 @@ export default function AddPartForm({
     // Same comma-or-dot rule as the price, but capped at two decimals.
     profitPercentage: (value) => {
       const trimmed = String(value ?? "").trim();
-      if (!trimmed) return "Įveskite pelno procentą.";
+      if (!trimmed) return "Įveskite antkainio procentą.";
       if (!/^\d+([.,]\d{1,2})?$/.test(trimmed)) {
-        return "Pelno procentas turi būti skaičius su ne daugiau nei 2 skaičiais po kablelio.";
+        return "Antkainio procentas turi būti skaičius su ne daugiau nei 2 skaičiais po kablelio.";
       }
       return "";
     },
@@ -183,7 +183,7 @@ export default function AddPartForm({
 
         <div style={formStyles.field}>
           <label style={formStyles.label} htmlFor="profit-percentage">
-            Pelno procentas
+            Antkainio procentas
           </label>
           <input
             id="profit-percentage"

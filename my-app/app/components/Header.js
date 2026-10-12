@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: "/screens/customers", label: "Klientai" },
   { href: "/screens/cars", label: "Automobiliai" },
   { href: "/screens/parts", label: "Dalys" },
+  { href: "/screens/login", label: "Atsijungti" },
 ];
 
 // "/" only matches itself; every other item also owns its sub-routes, so an
