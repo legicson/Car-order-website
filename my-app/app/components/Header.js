@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { space } from "../theme";
+import { signOut } from "../services/auth";
+import { LOGIN_PATH } from "./AuthGuard";
 
 const NAV_ITEMS = [
   { href: "/", label: "Pagrindinis" },
@@ -10,7 +12,6 @@ const NAV_ITEMS = [
   { href: "/screens/customers", label: "Klientai" },
   { href: "/screens/cars", label: "Automobiliai" },
   { href: "/screens/parts", label: "Dalys" },
-  { href: "/screens/login", label: "Atsijungti" },
 ];
 
 // "/" only matches itself; every other item also owns its sub-routes, so an
@@ -29,21 +30,27 @@ function Header() {
           <span style={style.text}>Merselita servisas</span>
         </Link>
 
-        <nav className="app-nav" aria-label="Pagrindinė navigacija">
-          {NAV_ITEMS.map((item) => {
-            const active = isActive(pathname, item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`app-nav-link${active ? " is-active" : ""}`}
-                aria-current={active ? "page" : undefined}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+        {pathname !== LOGIN_PATH && (
+          <nav className="app-nav" aria-label="Pagrindinė navigacija">
+            {NAV_ITEMS.map((item) => {
+              const active = isActive(pathname, item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`app-nav-link${active ? " is-active" : ""}`}
+                  aria-current={active ? "page" : undefined}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+            {/* AuthGuard redirects to the login page once the session ends. */}
+            <button type="button" className="app-nav-link" onClick={signOut}>
+              Atsijungti
+            </button>
+          </nav>
+        )}
       </div>
     </header>
   );

@@ -255,6 +255,14 @@ h3 {
   transition: background-color var(--transition), color var(--transition);
 }
 
+/* "Atsijungti" is a <button>, so strip the native button chrome. */
+button.app-nav-link {
+  background: transparent;
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
 .app-nav-link:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
